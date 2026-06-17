@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title desc">
+  <title id="title">BulkStatus icon concept A5</title>
+  <desc id="desc">Large foreground status checklist page with subtle prior tabs visible at the top and right side.</desc>
+  <defs>
+    <filter id="shadow-a5" x="-18%" y="-18%" width="142%" height="150%">
+      <feDropShadow dx="0" dy="7" stdDeviation="6" flood-color="#0f172a" flood-opacity=".28"/>
+    </filter>
+    <linearGradient id="front-a5" x1="14" y1="20" x2="114" y2="118" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#eef3f8"/>
+    </linearGradient>
+    <linearGradient id="back-a5" x1="22" y1="8" x2="122" y2="111" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#617486"/>
+      <stop offset="1" stop-color="#172333"/>
+    </linearGradient>
+    <linearGradient id="mid-a5" x1="16" y1="13" x2="120" y2="116" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#d7e1eb"/>
+      <stop offset="1" stop-color="#415369"/>
+    </linearGradient>
+    <linearGradient id="bar-a5" x1="53" y1="0" x2="109" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#273244"/>
+      <stop offset="1" stop-color="#172131"/>
+    </linearGradient>
+    <linearGradient id="gloss-green-a5" x1="24" y1="40" x2="48" y2="62" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#bbf7d0" stop-opacity=".95"/>
+      <stop offset=".55" stop-color="#22c55e" stop-opacity=".55"/>
+      <stop offset="1" stop-color="#16a34a" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="gloss-amber-a5" x1="24" y1="64" x2="48" y2="86" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fde68a" stop-opacity=".95"/>
+      <stop offset=".55" stop-color="#f59e0b" stop-opacity=".55"/>
+      <stop offset="1" stop-color="#d97706" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="gloss-red-a5" x1="24" y1="88" x2="48" y2="110" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fecaca" stop-opacity=".95"/>
+      <stop offset=".55" stop-color="#ef4444" stop-opacity=".55"/>
+      <stop offset="1" stop-color="#dc2626" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <g filter="url(#shadow-a5)">
+    <rect x="18" y="8" width="104" height="104" rx="20" fill="url(#back-a5)" stroke="#101827" stroke-width="1.5"/>
+    <rect x="28" y="18" width="84" height="84" rx="14" fill="#101827" opacity=".23"/>
+
+    <rect x="12" y="13" width="108" height="104" rx="20" fill="url(#mid-a5)" stroke="#718499" stroke-width="1.35"/>
+    <rect x="22" y="23" width="88" height="84" rx="14" fill="#102033" opacity=".17"/>
+
+    <rect x="6" y="19" width="112" height="99" rx="21" fill="url(#front-a5)" stroke="#c8d3df" stroke-width="1.7"/>
+  </g>
+
+  <g>
+    <circle cx="35" cy="49" r="10.5" fill="#22c55e" stroke="#12833d" stroke-width="1.45"/>
+    <path d="m30.4 49.2 3.2 3.5 6.6-7.2" fill="none" stroke="#ffffff" stroke-linecap="round" stroke-linejoin="round" stroke-width="3"/>
+    <path d="M26.6 44.7c2.5-5.4 13.8-6.3 17.3-.3-6-1.7-11.1-.9-17.3.3Z" fill="url(#gloss-green-a5)"/>
+    <rect x="54" y="42.5" width="55" height="13.5" rx="6.75" fill="url(#bar-a5)"/>
+
+    <circle cx="35" cy="73" r="10.5" fill="#f59e0b" stroke="#bd6f07" stroke-width="1.45"/>
+    <path d="M35 66.9v7.7" fill="none" stroke="#ffffff" stroke-linecap="round" stroke-width="3"/>
+    <circle cx="35" cy="79" r="1.7" fill="#ffffff"/>
+    <path d="M26.6 68.7c2.5-5.4 13.8-6.3 17.3-.3-6-1.7-11.1-.9-17.3.3Z" fill="url(#gloss-amber-a5)"/>
+    <rect x="54" y="66.5" width="55" height="13.5" rx="6.75" fill="url(#bar-a5)"/>
+
+    <circle cx="35" cy="97" r="10.5" fill="#ef4444" stroke="#b91c1c" stroke-width="1.45"/>
+    <path d="m31 93 8 8M39 93l-8 8" fill="none" stroke="#ffffff" stroke-linecap="round" stroke-width="3"/>
+    <path d="M26.6 92.7c2.5-5.4 13.8-6.3 17.3-.3-6-1.7-11.1-.9-17.3.3Z" fill="url(#gloss-red-a5)"/>
+    <rect x="54" y="90.5" width="55" height="13.5" rx="6.75" fill="url(#bar-a5)"/>
+  </g>
+</svg>

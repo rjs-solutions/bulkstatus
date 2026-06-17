@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>BulkStatus Icon Concepts</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #f4f7fb;
+      --panel: #ffffff;
+      --ink: #152033;
+      --muted: #607089;
+      --border: #d4deea;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f141b;
+        --panel: #161e29;
+        --ink: #f3f7fc;
+        --muted: #a9b8cc;
+        --border: #324156;
+      }
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: "Segoe UI", Arial, sans-serif;
+      line-height: 1.45;
+    }
+
+    main {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 32px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 28px;
+    }
+
+    p {
+      margin: 0 0 24px;
+      color: var(--muted);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 18px;
+    }
+
+    .card {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--panel);
+      padding: 18px;
+    }
+
+    .card h2 {
+      margin: 0 0 12px;
+      font-size: 16px;
+    }
+
+    .sizes {
+      display: grid;
+      grid-template-columns: 128px 48px 32px 16px;
+      align-items: center;
+      gap: 14px;
+      min-height: 150px;
+    }
+
+    img {
+      display: block;
+      background:
+        linear-gradient(45deg, rgba(120,130,150,.12) 25%, transparent 25%),
+        linear-gradient(-45deg, rgba(120,130,150,.12) 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, rgba(120,130,150,.12) 75%),
+        linear-gradient(-45deg, transparent 75%, rgba(120,130,150,.12) 75%);
+      background-size: 14px 14px;
+      background-position: 0 0, 0 7px, 7px -7px, -7px 0;
+      border-radius: 8px;
+    }
+
+    .notes {
+      margin-top: 12px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>BulkStatus Icon Concepts</h1>
+    <p>Design-only drafts. These are not wired into the extension package yet.</p>
+
+    <section class="grid" aria-label="Icon concepts">
+      <article class="card">
+        <h2>Concept A: Expanded Status</h2>
+        <div class="sizes">
+          <img src="concept-a-stacked-status.svg" width="128" height="128" alt="Concept A at 128 pixels">
+          <img src="concept-a-stacked-status.svg" width="48" height="48" alt="Concept A at 48 pixels">
+          <img src="concept-a-stacked-status.svg" width="32" height="32" alt="Concept A at 32 pixels">
+          <img src="concept-a-stacked-status.svg" width="16" height="16" alt="Concept A at 16 pixels">
+        </div>
+        <div class="notes">Main recommendation: larger footprint, clearer sheet fan, and status symbols for quick reading.</div>
+      </article>
+
+      <article class="card">
+        <h2>Concept A2: Expanded Dots</h2>
+        <div class="sizes">
+          <img src="concept-a2-expanded-dots.svg" width="128" height="128" alt="Concept A2 at 128 pixels">
+          <img src="concept-a2-expanded-dots.svg" width="48" height="48" alt="Concept A2 at 48 pixels">
+          <img src="concept-a2-expanded-dots.svg" width="32" height="32" alt="Concept A2 at 32 pixels">
+          <img src="concept-a2-expanded-dots.svg" width="16" height="16" alt="Concept A2 at 16 pixels">
+        </div>
+        <div class="notes">Same larger/fanned shape, but with plain dots if the symbols feel too busy.</div>
+      </article>
+
+      <article class="card">
+        <h2>Concept A3: Cascaded Tabs</h2>
+        <div class="sizes">
+          <img src="concept-a3-cascaded-tabs.svg" width="128" height="128" alt="Concept A3 at 128 pixels">
+          <img src="concept-a3-cascaded-tabs.svg" width="48" height="48" alt="Concept A3 at 48 pixels">
+          <img src="concept-a3-cascaded-tabs.svg" width="32" height="32" alt="Concept A3 at 32 pixels">
+          <img src="concept-a3-cascaded-tabs.svg" width="16" height="16" alt="Concept A3 at 16 pixels">
+        </div>
+        <div class="notes">Reference-inspired cascade: visible left/top sheet outlines with our established front status page.</div>
+      </article>
+
+      <article class="card">
+        <h2>Concept A4: Right Cascade</h2>
+        <div class="sizes">
+          <img src="concept-a4-right-cascade.svg" width="128" height="128" alt="Concept A4 at 128 pixels">
+          <img src="concept-a4-right-cascade.svg" width="48" height="48" alt="Concept A4 at 48 pixels">
+          <img src="concept-a4-right-cascade.svg" width="32" height="32" alt="Concept A4 at 32 pixels">
+          <img src="concept-a4-right-cascade.svg" width="16" height="16" alt="Concept A4 at 16 pixels">
+        </div>
+        <div class="notes">Prior tabs peek from the top and right edge, closer to the layered reference silhouette.</div>
+      </article>
+
+      <article class="card">
+        <h2>Concept A5: Larger Front</h2>
+        <div class="sizes">
+          <img src="concept-a5-large-front.svg" width="128" height="128" alt="Concept A5 at 128 pixels">
+          <img src="concept-a5-large-front.svg" width="48" height="48" alt="Concept A5 at 48 pixels">
+          <img src="concept-a5-large-front.svg" width="32" height="32" alt="Concept A5 at 32 pixels">
+          <img src="concept-a5-large-front.svg" width="16" height="16" alt="Concept A5 at 16 pixels">
+        </div>
+        <div class="notes">Less top reveal, subtle right-edge depth, and a larger front surface for the status rows.</div>
+      </article>
+
+      <article class="card">
+        <h2>Concept A6: Upward Cascade</h2>
+        <div class="sizes">
+          <img src="concept-a6-upward-cascade.svg" width="128" height="128" alt="Concept A6 at 128 pixels">
+          <img src="concept-a6-upward-cascade.svg" width="48" height="48" alt="Concept A6 at 48 pixels">
+          <img src="concept-a6-upward-cascade.svg" width="32" height="32" alt="Concept A6 at 32 pixels">
+          <img src="concept-a6-upward-cascade.svg" width="16" height="16" alt="Concept A6 at 16 pixels">
+        </div>
+        <div class="notes">Prior tabs sit down/right behind the front card, making the stack feel like it moves upward.</div>
+      </article>
+
+      <article class="card">
+        <h2>Concept B: Layered Dashboard</h2>
+        <div class="sizes">
+          <img src="concept-b-layered-dashboard.svg" width="128" height="128" alt="Concept B at 128 pixels">
+          <img src="concept-b-layered-dashboard.svg" width="48" height="48" alt="Concept B at 48 pixels">
+          <img src="concept-b-layered-dashboard.svg" width="32" height="32" alt="Concept B at 32 pixels">
+          <img src="concept-b-layered-dashboard.svg" width="16" height="16" alt="Concept B at 16 pixels">
+        </div>
+        <div class="notes">More inspired by the layered reference image, with status scoring separated from the stack.</div>
+      </article>
+
+      <article class="card">
+        <h2>Concept C: Toolbar Optimized</h2>
+        <div class="sizes">
+          <img src="concept-c-toolbar-optimized.svg" width="128" height="128" alt="Concept C at 128 pixels">
+          <img src="concept-c-toolbar-optimized.svg" width="48" height="48" alt="Concept C at 48 pixels">
+          <img src="concept-c-toolbar-optimized.svg" width="32" height="32" alt="Concept C at 32 pixels">
+          <img src="concept-c-toolbar-optimized.svg" width="16" height="16" alt="Concept C at 16 pixels">
+        </div>
+        <div class="notes">Simplest and likely most readable in the Chrome toolbar at small sizes.</div>
+      </article>
+
+      <article class="card">
+        <h2>Concept D: Polished Stack</h2>
+        <div class="sizes">
+          <img src="concept-d-polished-stack.svg" width="128" height="128" alt="Concept D at 128 pixels">
+          <img src="concept-d-polished-stack.svg" width="48" height="48" alt="Concept D at 48 pixels">
+          <img src="concept-d-polished-stack.svg" width="32" height="32" alt="Concept D at 32 pixels">
+        <img src="concept-d-polished-stack.svg" width="16" height="16" alt="Concept D at 16 pixels">
+        </div>
+        <div class="notes">Most premium-looking, but slightly more detailed at 16 pixels.</div>
+      </article>
+    </section>
+  </main>
+</body>
+</html>

@@ -1,0 +1,23 @@
+# BulkStatus canonical screenshot / demo URL set
+#
+# The 12 URLs below are deep pages (not homepages) across industries, from recognizable
+# public organizations, so results look realistic. Keep this list stable for consistent
+# captures. You can paste the whole file (blank and # comment lines are ignored) OR just
+# select the clean URL block beneath this header.
+#
+# Industry mapping (same order as below):
+#   1 healthcare  2 logistics  3 logistics  4 hospitality  5 airline  6 technology
+#   7 finance     8 CPG        9 telecom    10 automotive   11 retail  12 government
+
+https://www.mayoclinic.org/departments-centers
+https://www.fedex.com/en-us/shipping.html
+https://www.ups.com/us/en/support/shipping-support
+https://www.marriott.com/marriott-brands.mi
+https://www.delta.com/us/en/baggage/overview
+https://www.ibm.com/products/watsonx-ai
+https://www.jpmorganchase.com/about
+https://www.coca-colacompany.com/brands
+https://www.verizon.com/business/
+https://www.toyota.com/all-vehicles/
+https://corporate.target.com/about
+https://www.usa.gov/benefits

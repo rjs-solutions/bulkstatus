@@ -1,0 +1,15 @@
+{
+  "name": "bulkstatus",
+  "version": "0.1.36",
+  "private": true,
+  "type": "module",
+  "description": "Tooling for the BulkStatus Chrome extension (tests + lint). The extension itself ships from extension/.",
+  "scripts": {
+    "test": "node --test",
+    "lint": "eslint extension/src"
+  },
+  "devDependencies": {
+    "eslint": "^9.0.0",
+    "globals": "^15.0.0"
+  }
+}

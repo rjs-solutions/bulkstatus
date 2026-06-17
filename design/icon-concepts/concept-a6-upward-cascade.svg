@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title desc">
+  <title id="title">BulkStatus icon concept A6</title>
+  <desc id="desc">Large foreground status checklist page with prior tabs visible from the right and bottom, creating an upward cascade.</desc>
+  <defs>
+    <filter id="shadow-a6" x="-18%" y="-18%" width="142%" height="150%">
+      <feDropShadow dx="0" dy="7" stdDeviation="6" flood-color="#0f172a" flood-opacity=".28"/>
+    </filter>
+    <linearGradient id="front-a6" x1="13" y1="9" x2="112" y2="108" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#eef3f8"/>
+    </linearGradient>
+    <linearGradient id="back-a6" x1="22" y1="25" x2="122" y2="118" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#617486"/>
+      <stop offset="1" stop-color="#172333"/>
+    </linearGradient>
+    <linearGradient id="mid-a6" x1="16" y1="17" x2="120" y2="116" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#d7e1eb"/>
+      <stop offset="1" stop-color="#415369"/>
+    </linearGradient>
+    <linearGradient id="bar-a6" x1="53" y1="0" x2="109" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#273244"/>
+      <stop offset="1" stop-color="#172131"/>
+    </linearGradient>
+    <linearGradient id="gloss-green-a6" x1="24" y1="30" x2="48" y2="52" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#bbf7d0" stop-opacity=".95"/>
+      <stop offset=".55" stop-color="#22c55e" stop-opacity=".55"/>
+      <stop offset="1" stop-color="#16a34a" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="gloss-amber-a6" x1="24" y1="55" x2="48" y2="77" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fde68a" stop-opacity=".95"/>
+      <stop offset=".55" stop-color="#f59e0b" stop-opacity=".55"/>
+      <stop offset="1" stop-color="#d97706" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="gloss-red-a6" x1="24" y1="80" x2="48" y2="102" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fecaca" stop-opacity=".95"/>
+      <stop offset=".55" stop-color="#ef4444" stop-opacity=".55"/>
+      <stop offset="1" stop-color="#dc2626" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <g filter="url(#shadow-a6)">
+    <rect x="20" y="27" width="96" height="87" rx="19" fill="url(#back-a6)" stroke="#101827" stroke-width="1.5"/>
+    <rect x="30" y="37" width="76" height="67" rx="13" fill="#101827" opacity=".23"/>
+
+    <rect x="13" y="18" width="102" height="94" rx="20" fill="url(#mid-a6)" stroke="#718499" stroke-width="1.35"/>
+    <rect x="23" y="28" width="82" height="74" rx="14" fill="#102033" opacity=".17"/>
+
+    <rect x="6" y="8" width="112" height="99" rx="21" fill="url(#front-a6)" stroke="#c8d3df" stroke-width="1.7"/>
+  </g>
+
+  <g>
+    <circle cx="35" cy="39" r="10.5" fill="#22c55e" stroke="#12833d" stroke-width="1.45"/>
+    <path d="m30.4 39.2 3.2 3.5 6.6-7.2" fill="none" stroke="#ffffff" stroke-linecap="round" stroke-linejoin="round" stroke-width="3"/>
+    <path d="M26.6 34.7c2.5-5.4 13.8-6.3 17.3-.3-6-1.7-11.1-.9-17.3.3Z" fill="url(#gloss-green-a6)"/>
+    <rect x="54" y="32.5" width="55" height="13.5" rx="6.75" fill="url(#bar-a6)"/>
+
+    <circle cx="35" cy="64" r="10.5" fill="#f59e0b" stroke="#bd6f07" stroke-width="1.45"/>
+    <path d="M35 57.9v7.7" fill="none" stroke="#ffffff" stroke-linecap="round" stroke-width="3"/>
+    <circle cx="35" cy="70" r="1.7" fill="#ffffff"/>
+    <path d="M26.6 59.7c2.5-5.4 13.8-6.3 17.3-.3-6-1.7-11.1-.9-17.3.3Z" fill="url(#gloss-amber-a6)"/>
+    <rect x="54" y="57.5" width="55" height="13.5" rx="6.75" fill="url(#bar-a6)"/>
+
+    <circle cx="35" cy="89" r="10.5" fill="#ef4444" stroke="#b91c1c" stroke-width="1.45"/>
+    <path d="m31 85 8 8M39 85l-8 8" fill="none" stroke="#ffffff" stroke-linecap="round" stroke-width="3"/>
+    <path d="M26.6 84.7c2.5-5.4 13.8-6.3 17.3-.3-6-1.7-11.1-.9-17.3.3Z" fill="url(#gloss-red-a6)"/>
+    <rect x="54" y="82.5" width="55" height="13.5" rx="6.75" fill="url(#bar-a6)"/>
+  </g>
+</svg>

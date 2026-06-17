@@ -1,0 +1,39 @@
+{
+  "manifest_version": 3,
+  "name": "BulkStatus - Bulk URL Checker",
+  "short_name": "BulkStatus",
+  "description": "Bulk URL checker for asset status, redirects, metadata, links, images, and more.",
+  "version": "0.1.36",
+  "action": {
+    "default_title": "Open BulkStatus - Bulk URL Checker",
+    "default_icon": {
+      "16": "assets/icons/icon-16.png",
+      "32": "assets/icons/icon-32.png",
+      "48": "assets/icons/icon-48.png",
+      "128": "assets/icons/icon-128.png"
+    }
+  },
+  "icons": {
+    "16": "assets/icons/icon-16.png",
+    "32": "assets/icons/icon-32.png",
+    "48": "assets/icons/icon-48.png",
+    "128": "assets/icons/icon-128.png"
+  },
+  "background": {
+    "service_worker": "src/background.js"
+  },
+  "optional_permissions": [
+    "scripting"
+  ],
+  "optional_host_permissions": [
+    "http://*/*",
+    "https://*/*"
+  ],
+  "commands": {
+    "_execute_action": {
+      "suggested_key": {
+        "default": "Alt+B"
+      }
+    }
+  }
+}
