@@ -2,9 +2,9 @@
 
 All notable BulkStatus changes should be recorded here before packaging a new Chrome Web Store upload.
 
-## Unreleased
+## 1.0.0 - 2026-06-20
 
-Targeted for the 1.0.0 public release.
+The 1.0 milestone — renamed and repositioned for discovery, a refreshed progress and results UI, and performance and structural work under the hood.
 
 - Renamed to "BulkStatus - Bulk URL Checker & Crawler" and refreshed the store and README copy to cover crawling, SEO, and AI/search visibility (including llms.txt), without changing what the extension does.
 - Redesigned the in-progress view: pages, links, and images each get their own compact, color-coded bar (matching the Summary), with one status line for checked/queued/estimated time and clear "Step 1 of 2 / Step 2 of 2" phases.
@@ -15,6 +15,10 @@ Targeted for the 1.0.0 public release.
 - Matched the URL input box's resize handle and scrollbar styling to the Results table for a consistent feel.
 - Fixed the URL-list "click to upload" field so clicking it opens the file picker (previously only the Upload button worked).
 - Opening Settings now scrolls the panel into view when triggered from lower on the page.
+- Improved performance on large crawls: result updates are now batched per animation frame and row/summary counts are computed in a single pass, instead of rescanning every row on each checked item.
+- Added an explicit Manifest V3 content security policy as a hardening measure.
+- Reorganized the app's code into focused ES modules; no change to features or behavior.
+- Fixed a duplicate status toast that could re-appear when switching input sources, and a small inefficiency in the error-retry pass.
 
 ## 0.1.36 - 2026-06-16
 

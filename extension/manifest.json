@@ -3,7 +3,7 @@
   "name": "BulkStatus - Bulk URL Checker & Crawler",
   "short_name": "BulkStatus",
   "description": "Crawl and bulk-check URLs for status codes, broken links, redirects, images, and SEO metadata from a sitemap, llms.txt, or list.",
-  "version": "0.1.36",
+  "version": "1.0.0",
   "action": {
     "default_title": "Open BulkStatus - Bulk URL Checker & Crawler",
     "default_icon": {

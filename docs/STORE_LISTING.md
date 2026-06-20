@@ -2,7 +2,7 @@
 
 ## Current Package Version
 
-0.1.36
+1.0.0
 
 ## Title
 

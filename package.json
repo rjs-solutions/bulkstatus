@@ -1,6 +1,6 @@
 {
   "name": "bulkstatus",
-  "version": "0.1.36",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
   "description": "Tooling for the BulkStatus Chrome extension (tests + lint). The extension itself ships from extension/.",

@@ -3150,3 +3150,9 @@ section[data-settings-tab] > .settings-section-header { display: none; }
 .floating-top:hover { background: var(--surface-strong); }
 
 body.results-maximized .floating-top { display: none; }
+
+/* Settings opens via scrollIntoView; clear the sticky topbar so the band's
+   header (close + Save as default) isn't hidden behind it. */
+.settings-band {
+  scroll-margin-top: 80px;
+}
