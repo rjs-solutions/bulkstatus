@@ -1,5 +1,7 @@
 # Chrome Web Store Listing — Proposed Refresh
 
+> **Superseded.** This refresh has been folded into the canonical `STORE_LISTING.md` (title, short/long description, AI-visibility positioning, and GitHub topics). Kept here only for the rationale notes.
+
 This is a proposed revision of `STORE_LISTING.md`. The goal is a punchier hook, more
 search-relevant phrasing, and a screenshot order that leads with the payoff (results)
 rather than the input screen. Privacy and permission-justification sections are carried
@@ -7,7 +9,7 @@ over largely unchanged because they are already tuned for Chrome review.
 
 ## Title
 
-BulkStatus - Bulk URL Checker
+BulkStatus - Bulk URL Checker & Crawler
 
 ## Short Description (132 char max)
 

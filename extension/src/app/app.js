@@ -32,26 +32,23 @@ const RENDER_STABILITY_POLL_MS = 1000;
 const RENDER_STABILITY_MIN_WAIT_MS = 3000;
 const RENDER_STABILITY_TEXT_TOLERANCE = 50;
 const CHROME_WEB_STORE_LISTING_URL = "https://chromewebstore.google.com/detail/bulkstatus-bulk-url-check/ngoefpeflkbebdpemiiebbjlkhmmkmeh";
-// TODO: set GITHUB_REPO_URL once the public repo exists, e.g. "https://github.com/<user>/bulkstatus".
-// When empty, the "View full changelog" link in the About section stays hidden.
-const GITHUB_REPO_URL = "";
+// Public repository under the project org. Derives the changelog, issues, and privacy links.
+const GITHUB_REPO_URL = "https://github.com/rjs-solutions/bulkstatus";
 const CHANGELOG_URL = GITHUB_REPO_URL ? `${GITHUB_REPO_URL}/blob/main/CHANGELOG.md` : "";
+const GITHUB_ISSUES_URL = GITHUB_REPO_URL ? `${GITHUB_REPO_URL}/issues` : "";
+const PRIVACY_URL = GITHUB_REPO_URL ? `${GITHUB_REPO_URL}/blob/main/PRIVACY.md` : "";
 const LAST_SEEN_VERSION_KEY = "bulkstatus-last-version";
-// Short, user-facing highlights for the current release shown in the update banner / About.
-const WHATS_NEW = [
-  "Refreshed app icon for a clearer look in the toolbar and store.",
-  "Performance and reliability improvements under the hood."
-];
 const DEFAULT_SETTINGS = {
   checkLinks: true,
   checkImages: true,
   collapseResponsiveImages: true,
   dedupeLinks: true,
   autoRetryErrors: true,
-  ignoreNav: true,
-  ignoreFooter: true,
-  diagnosticMode: false,
-  diagnosticsPanelDefault: "hidden",
+  keepAwake: true,
+  ignoreNav: false,
+  ignoreFooter: false,
+  checkExternalLinks: true,
+  diagnosticMode: true,
   extractionMode: "rendered",
   pageConcurrency: 4,
   renderedConcurrency: 1,
@@ -105,6 +102,13 @@ const state = {
   completedWork: 0,
   totalWork: 0,
   currentPhase: "",
+  runStage: "idle",
+  resultsFullscreen: false,
+  progress: {
+    pages: { done: 0, total: 0 },
+    links: { done: 0, total: 0, enabled: true, discovered: false },
+    images: { done: 0, total: 0, enabled: true, discovered: false }
+  },
   runDiagnostics: [],
   panelCollapsed: {
     urls: false,
@@ -170,6 +174,7 @@ const state = {
 
 const elements = {
   autoRetryErrorsInput: document.querySelector("#autoRetryErrorsInput"),
+  keepAwakeInput: document.querySelector("#keepAwakeInput"),
   checkImagesInput: document.querySelector("#checkImagesInput"),
   checkLinksInput: document.querySelector("#checkLinksInput"),
   collapseResponsiveImagesInput: document.querySelector("#collapseResponsiveImagesInput"),
@@ -183,15 +188,12 @@ const elements = {
   copySummaryButton: document.querySelector("#copySummaryButton"),
   copyUrlsButton: document.querySelector("#copyUrlsButton"),
   dedupeLinksInput: document.querySelector("#dedupeLinksInput"),
-  diagnosticModeInput: document.querySelector("#diagnosticModeInput"),
-  diagnosticsPanelInput: document.querySelector("#diagnosticsPanelInput"),
   diagnosticsBody: document.querySelector("#diagnosticsBody"),
   diagnosticsList: document.querySelector("#diagnosticsList"),
   diagnosticsPanel: document.querySelector("#diagnosticsPanel"),
   diagnosticsSummary: document.querySelector("#diagnosticsSummary"),
   downloadDiagnosticsButton: document.querySelector("#downloadDiagnosticsButton"),
   extractionModeInput: document.querySelector("#extractionModeInput"),
-  emptyState: document.querySelector("#emptyState"),
   exportButton: document.querySelector("#exportButton"),
   exportSummaryButton: document.querySelector("#exportSummaryButton"),
   filterButton: document.querySelector("#filterButton"),
@@ -203,6 +205,7 @@ const elements = {
   hideSkippedToggle: document.querySelector("#hideSkippedToggle"),
   ignoreFooterInput: document.querySelector("#ignoreFooterInput"),
   ignoreNavInput: document.querySelector("#ignoreNavInput"),
+  checkExternalLinksInput: document.querySelector("#checkExternalLinksInput"),
   inputLimitCopy: document.querySelector("#inputLimitCopy"),
   inputModeButtons: [...document.querySelectorAll("[data-input-mode]")],
   linkConcurrencyInput: document.querySelector("#linkConcurrencyInput"),
@@ -212,11 +215,8 @@ const elements = {
   loadSourceButton: document.querySelector("#loadSourceButton"),
   maxDiscoveredAssetsInput: document.querySelector("#maxDiscoveredAssetsInput"),
   maxInputUrlsInput: document.querySelector("#maxInputUrlsInput"),
-  modeChip: document.querySelector("#modeChip"),
   linksChip: document.querySelector("#linksChip"),
   imagesChip: document.querySelector("#imagesChip"),
-  navChip: document.querySelector("#navChip"),
-  footerChip: document.querySelector("#footerChip"),
   openSettingsInlineButton: document.querySelector("#openSettingsInlineButton"),
   openStoreListingButton: document.querySelector("#openStoreListingButton"),
   openInactiveInput: document.querySelector("#openInactiveInput"),
@@ -225,10 +225,35 @@ const elements = {
   pauseRunButton: document.querySelector("#pauseRunButton"),
   pausedSettingsNotice: document.querySelector("#pausedSettingsNotice"),
   presetButtons: [...document.querySelectorAll("[data-preset]")],
-  progressBar: document.querySelector("#progressBar"),
   progressControls: document.querySelector("#progressControls"),
-  progressEstimate: document.querySelector("#progressEstimate"),
   progressWrap: document.querySelector("#progressWrap"),
+  progressStep: document.querySelector("#progressStep"),
+  progressMainBars: document.querySelector("#progressBars"),
+  pagesRow: document.querySelector("#pagesRow"),
+  pagesFill: document.querySelector("#pagesFill"),
+  pagesCount: document.querySelector("#pagesCount"),
+  linksRow: document.querySelector("#linksRow"),
+  linksFill: document.querySelector("#linksFill"),
+  linksCount: document.querySelector("#linksCount"),
+  imagesRow: document.querySelector("#imagesRow"),
+  imagesFill: document.querySelector("#imagesFill"),
+  imagesCount: document.querySelector("#imagesCount"),
+  genericRow: document.querySelector("#genericRow"),
+  genericLabel: document.querySelector("#genericLabel"),
+  genericFill: document.querySelector("#genericFill"),
+  genericCount: document.querySelector("#genericCount"),
+  progressBig: document.querySelector("#progressBig"),
+  progressBigLabel: document.querySelector("#progressBigLabel"),
+  progressEta: document.querySelector("#progressEta"),
+  progressQueued: document.querySelector("#progressQueued"),
+  resultsBand: document.querySelector("#resultsBand"),
+  resultsFullscreenButton: document.querySelector("#resultsFullscreenButton"),
+  footerVersionButton: document.querySelector("#footerVersionButton"),
+  footerGithubButton: document.querySelector("#footerGithubButton"),
+  footerIssueButton: document.querySelector("#footerIssueButton"),
+  footerPrivacyButton: document.querySelector("#footerPrivacyButton"),
+  footerBackToTop: document.querySelector("#footerBackToTop"),
+  floatingBackToTop: document.querySelector("#floatingBackToTop"),
   panelToggles: [...document.querySelectorAll("[data-panel-toggle]")],
   resultsBody: document.querySelector("#resultsBody"),
   resultsPanelBody: document.querySelector("#resultsPanelBody"),
@@ -244,6 +269,7 @@ const elements = {
   settingsBand: document.querySelector("#settingsBand"),
   settingsButton: document.querySelector("#settingsButton"),
   shareStoreListingButton: document.querySelector("#shareStoreListingButton"),
+  appToast: document.querySelector("#appToast"),
   paginationControls: [...document.querySelectorAll("[data-pagination-controls]")],
   paginationLabels: [...document.querySelectorAll("[data-page-label]")],
   paginationPageSizeSelects: [...document.querySelectorAll("[data-page-size-select]")],
@@ -259,7 +285,6 @@ const elements = {
   tableShell: document.querySelector("#tableShell"),
   stopRunButton: document.querySelector("#stopRunButton"),
   sourceInputHelp: document.querySelector("#sourceInputHelp"),
-  sourceInputLabel: document.querySelector("#sourceInputLabel"),
   sourceInputPanel: document.querySelector("#sourceInputPanel"),
   sourceStatus: document.querySelector("#sourceStatus"),
   sourceUrlInput: document.querySelector("#sourceUrlInput"),
@@ -281,12 +306,72 @@ const elements = {
   updateBannerText: document.querySelector("#updateBannerText"),
   updateBannerLink: document.querySelector("#updateBannerLink"),
   updateBannerDismiss: document.querySelector("#updateBannerDismiss"),
-  aboutVersion: document.querySelector("#aboutVersion"),
-  aboutWhatsNewList: document.querySelector("#aboutWhatsNewList"),
-  openChangelogButton: document.querySelector("#openChangelogButton")
+  exportConfigButton: document.querySelector("#exportConfigButton"),
+  importConfigButton: document.querySelector("#importConfigButton"),
+  configFileInput: document.querySelector("#configFileInput"),
+  settingsTabButtons: [...document.querySelectorAll(".settings-tab")],
+  settingsTabPanels: [...document.querySelectorAll("section[data-settings-tab]")],
+  copyAiSummaryButton: document.querySelector("#copyAiSummaryButton"),
+  openGithubButton: document.querySelector("#openGithubButton"),
+  reportIssueButton: document.querySelector("#reportIssueButton"),
+  rateExtensionButton: document.querySelector("#rateExtensionButton")
 };
 
+const SUMMARY_PLACEHOLDER_METRICS = [
+  { label: "Items", detail: "All results" },
+  { label: "Pages", detail: "Page URLs in crawl" },
+  { label: "Links", detail: "Discovered links" },
+  { label: "Images", detail: "Discovered images" },
+  { label: "Status issues", detail: "Non-200 status or errors" },
+  { label: "404s", detail: "Not found items" },
+  { label: "Redirects", detail: "Items with redirects" },
+  { label: "Skipped", detail: "Not checked by filters or stop" }
+];
+const SUMMARY_PLACEHOLDER_BREAKDOWNS = [
+  { title: "Asset type", items: [{ label: "Pages", tone: "page" }, { label: "Links", tone: "link" }, { label: "Images", tone: "image" }] },
+  { title: "Status", items: [{ label: "2xx", tone: "success" }, { label: "3xx", tone: "warning" }, { label: "4xx", tone: "danger" }, { label: "5xx", tone: "danger" }, { label: "Errors", tone: "danger" }, { label: "Skipped", tone: "muted" }] },
+  { title: "Page issues", items: [{ label: "Missing title", tone: "page" }, { label: "Missing description", tone: "page" }, { label: "Missing H1", tone: "page" }, { label: "Missing canonical", tone: "page" }, { label: "Canonicalized", tone: "page" }, { label: "Noindex", tone: "page" }] },
+  { title: "Asset issues", items: [{ label: "Non-200 links", tone: "link" }, { label: "Non-200 images", tone: "image" }, { label: "Missing image alt", tone: "image" }, { label: "Skipped assets", tone: "muted" }] }
+];
+
 init();
+
+function scrollAppToTop() {
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function updateBackToTopVisibility() {
+  if (!elements.floatingBackToTop) {
+    return;
+  }
+  const scrolled = (window.scrollY || document.documentElement.scrollTop || 0) > 480;
+  elements.floatingBackToTop.hidden = !scrolled || state.resultsFullscreen;
+}
+
+function bindFooter() {
+  const openIf = (url) => () => { if (url) { openExternalUrl(url); } };
+  elements.footerVersionButton.addEventListener("click", openIf(CHANGELOG_URL || GITHUB_REPO_URL));
+  elements.footerGithubButton.addEventListener("click", openIf(GITHUB_REPO_URL));
+  elements.footerIssueButton.addEventListener("click", openIf(GITHUB_ISSUES_URL));
+  elements.footerPrivacyButton.addEventListener("click", openIf(PRIVACY_URL));
+  elements.footerBackToTop.addEventListener("click", scrollAppToTop);
+  elements.floatingBackToTop.addEventListener("click", scrollAppToTop);
+  window.addEventListener("scroll", updateBackToTopVisibility, { passive: true });
+  updateBackToTopVisibility();
+}
+
+function setResultsFullscreen(on) {
+  state.resultsFullscreen = Boolean(on);
+  document.body.classList.toggle("results-maximized", state.resultsFullscreen);
+  elements.resultsBand.classList.toggle("is-maximized", state.resultsFullscreen);
+  updateBackToTopVisibility();
+  const button = elements.resultsFullscreenButton;
+  if (button) {
+    const label = state.resultsFullscreen ? "Exit full screen" : "Expand results to full screen";
+    button.title = label;
+    button.setAttribute("aria-label", label);
+  }
+}
 
 function init() {
   applyTheme(localStorage.getItem("bulkstatus-theme") || defaultTheme());
@@ -317,17 +402,19 @@ function init() {
     renderResults();
   });
   elements.filterPanel.addEventListener("change", handleFilterChange);
-  elements.modeChip.addEventListener("click", toggleModeFromChip);
   elements.linksChip.addEventListener("click", () => toggleBooleanSettingFromChip("checkLinks"));
   elements.imagesChip.addEventListener("click", () => toggleBooleanSettingFromChip("checkImages"));
-  elements.navChip.addEventListener("click", () => toggleBooleanSettingFromChip("ignoreNav"));
-  elements.footerChip.addEventListener("click", () => toggleBooleanSettingFromChip("ignoreFooter"));
   elements.openSettingsInlineButton.addEventListener("click", openSettings);
   elements.openStoreListingButton.addEventListener("click", openStoreListing);
-  elements.shareStoreListingButton.addEventListener("click", copyStoreListingLink);
+  elements.shareStoreListingButton.addEventListener("click", shareStoreListing);
   elements.exportButton.addEventListener("click", exportCsv);
   elements.exportSummaryButton.addEventListener("click", exportSummaryCsv);
   elements.fileInput.addEventListener("change", handleFileUpload);
+  elements.sourceUrlInput.addEventListener("click", () => {
+    if (state.inputMode === "list" && !elements.fileInput.disabled) {
+      elements.fileInput.click();
+    }
+  });
   elements.inputModeButtons.forEach((button) => {
     button.addEventListener("click", () => setInputMode(button.dataset.inputMode));
   });
@@ -335,6 +422,13 @@ function init() {
   elements.pauseRunButton.addEventListener("click", toggleRunPause);
   elements.retryErrorsButton.addEventListener("click", retryErrorResults);
   elements.stopRunButton.addEventListener("click", stopRun);
+  elements.resultsFullscreenButton.addEventListener("click", () => setResultsFullscreen(!state.resultsFullscreen));
+  bindFooter();
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && state.resultsFullscreen) {
+      setResultsFullscreen(false);
+    }
+  });
   elements.sourceUrlInput.addEventListener("keydown", (event) => {
     if (event.key === "Enter") {
       event.preventDefault();
@@ -373,12 +467,18 @@ function init() {
   elements.themeDarkButton.addEventListener("click", () => setTheme("dark"));
   elements.themePreferenceInput.addEventListener("change", () => setTheme(elements.themePreferenceInput.value));
   bindSortableHeaders();
-  setupAboutSection();
   bindUpdateNotice();
+  bindConfigTransfer();
+  bindVersionLink();
+  bindSettingsTabs();
+  bindAppLinks();
+  elements.copyAiSummaryButton.addEventListener("click", copyAiSummaryPrompt);
   renderPanelStates();
   renderInputMode();
   renderDiagnostics();
   renderSummaryPanel();
+  renderResults();
+  renderProgress();
   maybeShowUpdateBanner();
 }
 
@@ -458,13 +558,21 @@ function bindPanelToggles() {
   });
 }
 
-function renderPanelStates() {
-  const diagnosticsHidden = state.settings.diagnosticsPanelDefault === "hidden";
-  elements.diagnosticsPanel.hidden = diagnosticsHidden;
-  if (diagnosticsHidden) {
-    elements.diagnosticsBody.hidden = true;
+function setKeepAwake(on) {
+  try {
+    if (typeof chrome !== "undefined" && chrome.power) {
+      if (on) {
+        chrome.power.requestKeepAwake("system");
+      } else {
+        chrome.power.releaseKeepAwake();
+      }
+    }
+  } catch (error) {
+    // Power API unavailable; ignore.
   }
+}
 
+function renderPanelStates() {
   const panels = {
     urls: { body: elements.urlsPanelBody, label: "Inputs" },
     summary: { body: elements.summaryPanelBody, label: "Summary" },
@@ -476,13 +584,6 @@ function renderPanelStates() {
     const panel = button.dataset.panelToggle;
     const config = panels[panel];
     if (!config) {
-      return;
-    }
-
-    if (panel === "diagnostics" && diagnosticsHidden) {
-      button.setAttribute("aria-expanded", "false");
-      button.setAttribute("aria-label", "Expand Diagnostics");
-      button.title = "Expand Diagnostics";
       return;
     }
 
@@ -526,7 +627,7 @@ function renderInputMode() {
     list: {
       label: "URL list",
       help: urlListHelpText(),
-      placeholder: "",
+      placeholder: `Click to upload a .txt or .csv (no header row needed, one URL per line. Row limit of ${formatNumber(state.settings.maxInputUrls)} lines, adjustable in Settings).`,
       textarea: "https://example.com\nexample.com/pricing\nhttps://example.com/blog"
     },
     sitemap: {
@@ -559,9 +660,10 @@ function renderInputMode() {
   elements.urlInput.value = state.inputTextByMode[state.inputMode] || "";
 
   const config = labels[state.inputMode];
-  elements.sourceInputLabel.textContent = config.label;
   elements.sourceInputHelp.textContent = inputModeHelpText(state.inputMode);
   elements.sourceUrlInput.placeholder = config.placeholder;
+  elements.sourceUrlInput.readOnly = !sourceMode;
+  elements.sourceUrlInput.classList.toggle("is-upload-trigger", !sourceMode);
   elements.urlInput.placeholder = config.textarea;
 
   if (sourceMode) {
@@ -588,6 +690,9 @@ function updateVersionLabel() {
   const manifest = appManifest();
   elements.versionLabel.textContent = `Version ${manifest.version || "dev"}`;
   elements.versionLabel.title = `${manifest.name || "BulkStatus"} ${manifest.version || "dev"}`;
+  if (elements.footerVersionButton) {
+    elements.footerVersionButton.textContent = `BulkStatus v${manifest.version || "dev"}`;
+  }
 }
 
 function loadSettings() {
@@ -605,11 +710,11 @@ function loadSettings() {
   elements.collapseResponsiveImagesInput.checked = state.settings.collapseResponsiveImages;
   elements.dedupeLinksInput.checked = state.settings.dedupeLinks;
   elements.autoRetryErrorsInput.checked = state.settings.autoRetryErrors;
-  elements.ignoreNavInput.checked = state.settings.ignoreNav;
-  elements.ignoreFooterInput.checked = state.settings.ignoreFooter;
-  elements.diagnosticModeInput.checked = state.settings.diagnosticMode;
-  elements.diagnosticsPanelInput.value = state.settings.diagnosticsPanelDefault;
-  elements.extractionModeInput.value = state.settings.extractionMode;
+  elements.keepAwakeInput.checked = state.settings.keepAwake;
+  elements.ignoreNavInput.checked = !state.settings.ignoreNav;
+  elements.ignoreFooterInput.checked = !state.settings.ignoreFooter;
+  elements.checkExternalLinksInput.checked = state.settings.checkExternalLinks;
+  elements.extractionModeInput.checked = state.settings.extractionMode === "rendered";
   elements.renderedConcurrencyInput.value = formatNumber(state.settings.renderedConcurrency);
   elements.renderWaitInput.value = formatRenderWaitInputValue(state.settings.renderWaitMs);
   elements.openInactiveInput.checked = state.settings.openInactive;
@@ -617,12 +722,11 @@ function loadSettings() {
   elements.useBrowserSessionInput.checked = state.settings.useBrowserSessionForRenderedChecks;
   elements.closeRenderedTabsInput.checked = state.settings.closeRenderedTabs;
   elements.timeDisplayUnitInput.value = state.settings.timeDisplayUnit;
-  elements.resultsDensityInput.value = state.settings.resultsDensity;
+  elements.resultsDensityInput.checked = state.settings.resultsDensity === "dense";
   elements.columnToggles.forEach((input) => {
     input.checked = state.settings.visibleColumns[input.dataset.columnToggle] !== false;
   });
   applyResultsDensity();
-  applyDiagnosticsPanelDefault();
   formatNumericInputs();
   updateExtractionModeUi();
   updateModeHint();
@@ -667,10 +771,10 @@ function bindSettings() {
     elements.collapseResponsiveImagesInput,
     elements.dedupeLinksInput,
     elements.autoRetryErrorsInput,
+    elements.keepAwakeInput,
     elements.ignoreNavInput,
+    elements.checkExternalLinksInput,
     elements.ignoreFooterInput,
-    elements.diagnosticModeInput,
-    elements.diagnosticsPanelInput,
     elements.extractionModeInput,
     elements.pageConcurrencyInput,
     elements.renderedConcurrencyInput,
@@ -706,18 +810,17 @@ function saveSettingsFromInputs(options = {}) {
   const renderWaitMs = options.renderWaitMsOverride ?? parseTimeSettingInput(elements.renderWaitInput.value, timeDisplayUnit, DEFAULT_SETTINGS.renderWaitMs);
   const timeoutMs = options.timeoutMsOverride ?? parseTimeSettingInput(elements.timeoutInput.value, timeDisplayUnit, DEFAULT_SETTINGS.timeoutMs);
   const linkDelayMs = options.linkDelayMsOverride ?? parseTimeSettingInput(elements.linkDelayInput.value, timeDisplayUnit, DEFAULT_SETTINGS.linkDelayMs);
-  const previousDiagnosticsPanelDefault = state.settings.diagnosticsPanelDefault;
   state.settings = normalizeSettings({
     checkLinks: elements.checkLinksInput.checked,
     checkImages: elements.checkImagesInput.checked,
     collapseResponsiveImages: elements.collapseResponsiveImagesInput.checked,
     dedupeLinks: elements.dedupeLinksInput.checked,
     autoRetryErrors: elements.autoRetryErrorsInput.checked,
-    ignoreNav: elements.ignoreNavInput.checked,
-    ignoreFooter: elements.ignoreFooterInput.checked,
-    diagnosticMode: elements.diagnosticModeInput.checked,
-    diagnosticsPanelDefault: elements.diagnosticsPanelInput.value,
-    extractionMode: elements.extractionModeInput.value,
+    keepAwake: elements.keepAwakeInput.checked,
+    ignoreNav: !elements.ignoreNavInput.checked,
+    ignoreFooter: !elements.ignoreFooterInput.checked,
+    checkExternalLinks: elements.checkExternalLinksInput.checked,
+    extractionMode: elements.extractionModeInput.checked ? "rendered" : "static",
     pageConcurrency: elements.pageConcurrencyInput.value,
     renderedConcurrency: elements.renderedConcurrencyInput.value,
     renderWaitMs,
@@ -728,7 +831,7 @@ function saveSettingsFromInputs(options = {}) {
     linkConcurrency: elements.linkConcurrencyInput.value,
     timeoutMs,
     timeDisplayUnit,
-    resultsDensity: elements.resultsDensityInput.value,
+    resultsDensity: elements.resultsDensityInput.checked ? "dense" : "comfortable",
     linkDelayMs,
     maxInputUrls: elements.maxInputUrlsInput.value,
     maxDiscoveredAssets: elements.maxDiscoveredAssetsInput.value,
@@ -741,9 +844,6 @@ function saveSettingsFromInputs(options = {}) {
   updatePresetButtons();
   formatNumericInputs();
   applyResultsDensity();
-  if (previousDiagnosticsPanelDefault !== state.settings.diagnosticsPanelDefault) {
-    applyDiagnosticsPanelDefault();
-  }
   applyColumnVisibility();
   updateExtractionModeUi();
   updateModeHint();
@@ -764,10 +864,11 @@ function normalizeSettings(settings) {
     collapseResponsiveImages: settings.collapseResponsiveImages !== false,
     dedupeLinks: Boolean(settings.dedupeLinks),
     autoRetryErrors: settings.autoRetryErrors !== false,
+    keepAwake: settings.keepAwake !== false,
     ignoreNav: Boolean(settings.ignoreNav),
     ignoreFooter: Boolean(settings.ignoreFooter),
-    diagnosticMode: Boolean(settings.diagnosticMode),
-    diagnosticsPanelDefault: normalizeDiagnosticsPanelDefault(settings.diagnosticsPanelDefault),
+    checkExternalLinks: settings.checkExternalLinks !== false,
+    diagnosticMode: true,
     extractionMode: settings.extractionMode === "rendered" ? "rendered" : "static",
     pageConcurrency: clampNumber(settings.pageConcurrency, 1, 12, DEFAULT_SETTINGS.pageConcurrency),
     renderedConcurrency: clampNumber(settings.renderedConcurrency, 1, 3, DEFAULT_SETTINGS.renderedConcurrency),
@@ -777,9 +878,9 @@ function normalizeSettings(settings) {
     useBrowserSessionForRenderedChecks: settings.useBrowserSessionForRenderedChecks !== false,
     closeRenderedTabs: settings.closeRenderedTabs !== false,
     linkConcurrency: clampNumber(settings.linkConcurrency, 1, 16, DEFAULT_SETTINGS.linkConcurrency),
-    timeoutMs: clampNumber(settings.timeoutMs, 1000, 60000, DEFAULT_SETTINGS.timeoutMs),
+    timeoutMs: clampNumber(settings.timeoutMs, 1000, 300000, DEFAULT_SETTINGS.timeoutMs),
     timeDisplayUnit: settings.timeDisplayUnit === "milliseconds" ? "milliseconds" : "seconds",
-    resultsDensity: ["comfortable", "compact", "dense"].includes(settings.resultsDensity) ? settings.resultsDensity : DEFAULT_SETTINGS.resultsDensity,
+    resultsDensity: ["comfortable", "dense"].includes(settings.resultsDensity) ? settings.resultsDensity : DEFAULT_SETTINGS.resultsDensity,
     linkDelayMs: clampNumber(settings.linkDelayMs, 0, 10000, DEFAULT_SETTINGS.linkDelayMs),
     maxInputUrls: clampNumber(settings.maxInputUrls, 1, MAX_INPUT_URL_LIMIT, DEFAULT_SETTINGS.maxInputUrls),
     maxDiscoveredAssets: clampNumber(settings.maxDiscoveredAssets, 1, MAX_DISCOVERED_ASSET_LIMIT, DEFAULT_SETTINGS.maxDiscoveredAssets),
@@ -789,18 +890,6 @@ function normalizeSettings(settings) {
     },
     settingsVersion: SETTINGS_VERSION
   };
-}
-
-function normalizeDiagnosticsPanelDefault(value) {
-  if (value === "shown") {
-    return "expanded";
-  }
-
-  if (value === "expanded" || value === "collapsed" || value === "hidden") {
-    return value;
-  }
-
-  return DEFAULT_SETTINGS.diagnosticsPanelDefault;
 }
 
 function getDefaultSettings() {
@@ -863,8 +952,8 @@ function updateRenderWaitCopy() {
     : `Maximum seconds after page load while waiting for rendered DOM stability. Supports up to ${formatNumber(MAX_RENDER_WAIT_MS / 1000)} seconds.`;
   elements.timeoutLabel.textContent = milliseconds ? "Timeout ms" : "Timeout sec";
   elements.timeoutHelp.textContent = milliseconds
-    ? "Applies to page, link, and image requests. Supports 1,000-60,000 ms."
-    : "Applies to page, link, and image requests. Supports 1-60 seconds.";
+    ? "Applies to page, link, and image requests. Supports 1,000-300,000 ms."
+    : "Applies to page, link, and image requests. Supports 1-300 seconds.";
   elements.linkDelayLabel.textContent = milliseconds ? "Delay per asset ms" : "Delay per asset sec";
   elements.linkDelayHelp.textContent = milliseconds
     ? "Pause before checking each discovered link/image. Supports up to 10,000 ms."
@@ -872,12 +961,11 @@ function updateRenderWaitCopy() {
 }
 
 function updateInputLimitCopy() {
-  elements.inputLimitCopy.textContent = "Choose an input source, adjust configuration settings if necessary, then provide the URLs you'd like to retrieve information for.";
   elements.sourceInputHelp.textContent = inputModeHelpText(state.inputMode);
 }
 
 function urlListHelpText() {
-  return `Include one URL per line. TXT/CSV upload supported. Input URL limit: ${formatNumber(state.settings.maxInputUrls)}. Adjust in Settings.`;
+  return "Add URLs by uploading a TXT/CSV file, or type them in the box below.";
 }
 
 function inputModeHelpText(mode) {
@@ -895,7 +983,7 @@ function inputModeHelpText(mode) {
 }
 
 function updateExtractionModeUi() {
-  const rendered = elements.extractionModeInput.value === "rendered";
+  const rendered = elements.extractionModeInput.checked;
   document.querySelectorAll(".rendered-setting").forEach((element) => {
     element.hidden = !rendered;
   });
@@ -907,11 +995,8 @@ function formatNumber(value) {
 }
 
 function updateModeHint() {
-  elements.modeChip.setAttribute("aria-pressed", String(state.settings.extractionMode === "rendered"));
   elements.linksChip.setAttribute("aria-pressed", String(state.settings.checkLinks));
   elements.imagesChip.setAttribute("aria-pressed", String(state.settings.checkImages));
-  elements.navChip.setAttribute("aria-pressed", String(!state.settings.ignoreNav));
-  elements.footerChip.setAttribute("aria-pressed", String(!state.settings.ignoreFooter));
 }
 
 function extractionModeLabel() {
@@ -984,11 +1069,6 @@ function applyColumnVisibility() {
 
 function applyResultsDensity() {
   document.documentElement.dataset.resultsDensity = state.settings.resultsDensity || DEFAULT_SETTINGS.resultsDensity;
-}
-
-function applyDiagnosticsPanelDefault() {
-  state.panelCollapsed.diagnostics = state.settings.diagnosticsPanelDefault !== "expanded";
-  renderPanelStates();
 }
 
 function bindSortableHeaders() {
@@ -1104,16 +1184,22 @@ async function runChecks() {
   state.completedWork = 0;
   state.totalWork = urls.length;
   state.currentPhase = "Preparing run";
+  state.runStage = "";
+  state.progress = {
+    pages: { done: 0, total: urls.length },
+    links: { done: 0, total: 0, enabled: state.settings.checkLinks, discovered: false },
+    images: { done: 0, total: 0, enabled: state.settings.checkImages, discovered: false }
+  };
   state.lastRunDurationMs = 0;
   state.runDiagnostics = [];
   state.summaryShown = false;
   state.panelCollapsed.summary = false;
-  state.panelCollapsed.diagnostics = state.settings.diagnosticsPanelDefault !== "expanded";
+  state.panelCollapsed.diagnostics = false;
   state.only404 = false;
   clearResultFilters(false);
   resetResultsPagination({ collapseShowAll: true });
   addEnvironmentDiagnostic();
-  addRunDiagnostic("Run started", `${urls.length} page URL${urls.length === 1 ? "" : "s"}; input ${inputModeLabel()}; mode ${extractionModeLabel()}; links ${onOff(state.settings.checkLinks)}; images ${onOff(state.settings.checkImages)}; responsive image collapse ${onOff(state.settings.collapseResponsiveImages)}; browser session ${onOff(state.settings.useBrowserSessionForRenderedChecks)}; dedicated render window ${onOff(state.settings.useDedicatedRenderWindow)}; auto retry errors ${onOff(state.settings.autoRetryErrors)}; time display ${state.settings.timeDisplayUnit}; results density ${state.settings.resultsDensity}; diagnostics panel ${state.settings.diagnosticsPanelDefault}.`);
+  addRunDiagnostic("Run started", `${urls.length} page URL${urls.length === 1 ? "" : "s"}; input ${inputModeLabel()}; mode ${extractionModeLabel()}; links ${onOff(state.settings.checkLinks)}; images ${onOff(state.settings.checkImages)}; responsive image collapse ${onOff(state.settings.collapseResponsiveImages)}; browser session ${onOff(state.settings.useBrowserSessionForRenderedChecks)}; dedicated render window ${onOff(state.settings.useDedicatedRenderWindow)}; auto retry errors ${onOff(state.settings.autoRetryErrors)}; keep awake ${onOff(state.settings.keepAwake)}; time display ${state.settings.timeDisplayUnit}; results density ${state.settings.resultsDensity}`);
   if (parsedInput.truncatedCount > 0) {
     addRunDiagnostic("Input URL limit", `${formatMaybeNumber(parsedInput.truncatedCount)} input URL${parsedInput.truncatedCount === 1 ? "" : "s"} were not checked because the current input URL limit is ${formatMaybeNumber(parsedInput.limit)}.`);
   }
@@ -1123,11 +1209,13 @@ async function runChecks() {
   updateProgress(state.completedWork, state.totalWork);
   renderResults();
 
+  setKeepAwake(state.settings.keepAwake);
   let completedNormally = false;
   let runError = "";
   try {
     const assetJobs = [];
     const pageConcurrency = currentPageConcurrency();
+    state.runStage = "pages";
     setRunPhase(`Checking pages with concurrency ${pageConcurrency}`);
     await runWithConcurrency(urls, currentPageConcurrency, async (url, index) => {
       markPageRowChecking(index);
@@ -1138,6 +1226,7 @@ async function runChecks() {
       state.rows[index] = result.row;
       assetJobs.push(...result.assetJobs.map((job) => ({ ...job, groupId: result.row.groupId })));
       state.completedWork += 1;
+      state.progress.pages.done += 1;
       updateProgress(state.completedWork, state.totalWork);
       renderResults();
       maybePauseForAuthWall(result.row);
@@ -1161,6 +1250,7 @@ async function runChecks() {
     addRunDiagnostic("Run error", runError);
   } finally {
     await finishRun(completedNormally, runError);
+    setKeepAwake(false);
   }
 
   if (completedNormally && !runError && state.settings.autoRetryErrors) {
@@ -1216,6 +1306,7 @@ async function retryErrorResults(options = {}) {
   state.completedWork = 0;
   state.totalWork = attempted;
   state.currentPhase = "Retrying error rows";
+  state.runStage = "retry";
   setControls();
   updateProgress(state.completedWork, state.totalWork);
   addRunDiagnostic(automatic ? "Auto retry errors started" : "Retry errors started", `${formatMaybeNumber(attempted)} error row${attempted === 1 ? "" : "s"} queued for retry.`);
@@ -1322,7 +1413,8 @@ async function finishRetryErrors(attempted, recovered, runError = "", automatic 
   setControls();
   renderResults();
   renderDiagnostics();
-  elements.progressWrap.hidden = true;
+  state.runStage = "idle";
+  renderProgress();
 }
 
 function retryableErrorEntries() {
@@ -1380,6 +1472,11 @@ async function runAssetChecks(assetJobs) {
   const assetGroups = groupAssetJobs(cappedCheckableJobs);
   const duplicateAssetCount = Math.max(0, totalAssets - assetGroups.length);
   let completedLinks = 0;
+  state.progress.links.total = cappedCheckableJobs.filter((job) => job.kind === "Link").length;
+  state.progress.links.discovered = true;
+  state.progress.images.total = cappedCheckableJobs.filter((job) => job.kind === "Image").length;
+  state.progress.images.discovered = true;
+  state.runStage = "assets";
   state.totalWork += totalAssets;
   updateProgress(state.completedWork, state.totalWork);
   setRunPhase(`Checking ${formatMaybeNumber(totalAssets)} discovered assets with concurrency ${currentAssetConcurrency()}`);
@@ -1403,6 +1500,11 @@ async function runAssetChecks(assetJobs) {
     checkedGroupKeys.add(group.key);
     completedLinks += group.jobs.length;
     state.completedWork += group.jobs.length;
+    if (group.primary.kind === "Image") {
+      state.progress.images.done += group.jobs.length;
+    } else {
+      state.progress.links.done += group.jobs.length;
+    }
     updateProgress(state.completedWork, state.totalWork);
     renderResults();
   }, { maxLimit: 16 });
@@ -1500,7 +1602,8 @@ async function finishRun(completedNormally, runError = "") {
   setControls();
   renderResults();
   renderDiagnostics();
-  elements.progressWrap.hidden = true;
+  state.runStage = "idle";
+  renderProgress();
 }
 
 function markQueuedRowsStopped() {
@@ -1654,18 +1757,10 @@ async function fetchInputSourceText(sourceUrl, sourceName) {
   };
 }
 
-function setSourceStatus(message, tone) {
-  if (!elements.sourceStatus) {
-    return;
-  }
-
+function setSourceStatus(message) {
   const text = String(message || "").trim();
-  elements.sourceStatus.textContent = text;
-  elements.sourceStatus.hidden = !text;
-  elements.sourceStatus.classList.toggle("is-success", tone === "success");
-  elements.sourceStatus.classList.toggle("is-error", tone === "error");
-  if (state.inputMode !== "list") {
-    state.sourceStatusByMode[state.inputMode] = text;
+  if (text) {
+    showToast(text);
   }
 }
 
@@ -2592,7 +2687,18 @@ function getSkippedReason(job) {
     return "Not checked: ignored footer";
   }
 
+  if (!state.settings.checkExternalLinks && job.kind === "Link" && isExternalLink(job)) {
+    return "Not checked: external link";
+  }
+
   return "";
+}
+
+function isExternalLink(job) {
+  const norm = (value) => hostnameFor(value).replace(/^www\./, "");
+  const src = norm(job.sourcePage);
+  const dest = norm(job.href);
+  return Boolean(src && dest && src !== dest);
 }
 
 function isNavLikeLocation(location) {
@@ -2692,19 +2798,42 @@ function isLikelyProtectedImageCdn(value) {
   }
 }
 
+function renderResultsPlaceholderRows(count) {
+  const headerCells = [...document.querySelectorAll("table thead th")];
+  const rows = [];
+  for (let i = 0; i < count; i += 1) {
+    const tr = document.createElement("tr");
+    tr.className = "results-placeholder-row";
+    tr.setAttribute("aria-hidden", "true");
+    headerCells.forEach((th) => {
+      const td = document.createElement("td");
+      td.dataset.column = th.dataset.column || "";
+      if (th.hidden) {
+        td.hidden = true;
+      }
+      if (th.dataset.column !== "expander" && th.dataset.column !== "open") {
+        const bar = document.createElement("span");
+        bar.className = "skeleton-bar";
+        td.append(bar);
+      }
+      tr.append(td);
+    });
+    rows.push(tr);
+  }
+  return rows;
+}
+
 function renderResults() {
   applyColumnVisibility();
   updateSortHeaders();
   renderFilterPanel();
   if (!state.rows.length) {
-    elements.resultsBody.replaceChildren();
-    elements.emptyState.hidden = false;
+    elements.resultsBody.replaceChildren(...renderResultsPlaceholderRows(6));
     renderPaginationControls();
     updateSummary();
     return;
   }
 
-  elements.emptyState.hidden = true;
   const rows = visibleRows();
   elements.resultsBody.replaceChildren(...rows.map((row) => renderRow(row)));
   maybeResetResultsScroll();
@@ -3223,7 +3352,7 @@ function renderRow(row) {
   const values = [
     stateCell(row),
     expandCell(row),
-    textCell("type", row.rowType),
+    textCell("type", row.rowType, `type-tag type-${String(row.rowType || "").toLowerCase()}`),
     openCell(row),
     textCell("inputUrl", row.inputUrl),
     textCell("sourcePage", row.sourcePage),
@@ -3441,50 +3570,167 @@ function isNon200Status(statusCode, redirectCount = 0) {
 }
 
 function updateProgress(completed, total) {
-  const percent = total ? Math.round((completed / total) * 100) : 0;
-  elements.progressWrap.hidden = !total;
-  elements.progressBar.style.width = `${percent}%`;
-  elements.progressEstimate.textContent = progressText(completed, total);
+  renderProgress();
+  updateRunControlButtons();
+}
+
+function etaText(completed, total) {
+  if (!total || !completed || !state.runStartedAt) {
+    return "calculating\u2026";
+  }
+
+  const elapsedMs = performance.now() - state.runStartedAt;
+  const remainingMs = Math.max(0, (elapsedMs / completed) * (total - completed));
+  return `~${formatEstimatedDuration(remainingMs)} left`;
+}
+
+function assetStageLabel() {
+  const links = state.settings.checkLinks;
+  const images = state.settings.checkImages;
+  if (links && images) {
+    return "Checking links & images";
+  }
+  if (links) {
+    return "Checking links";
+  }
+  if (images) {
+    return "Checking images";
+  }
+  return "Checking assets";
+}
+
+function setProgressBar(rowEl, fillEl, countEl, data) {
+  rowEl.hidden = false;
+  rowEl.classList.remove("is-off", "is-pending");
+  if (!data.enabled) {
+    rowEl.classList.add("is-off");
+    fillEl.style.width = "0%";
+    countEl.innerHTML = '<span class="off-pill">Off</span>';
+    return;
+  }
+  if (!data.discovered) {
+    rowEl.classList.add("is-pending");
+    fillEl.style.width = "0%";
+    countEl.textContent = "Pending";
+    return;
+  }
+  if (!data.total) {
+    fillEl.style.width = "100%";
+    countEl.textContent = "None found";
+    return;
+  }
+  const pct = Math.round((data.done / data.total) * 100);
+  fillEl.style.width = `${pct}%`;
+  countEl.textContent = `${formatMaybeNumber(data.done)} / ${formatMaybeNumber(data.total)}`;
+}
+
+function renderProgressSide(done, total, label, etaCompleted, etaTotal) {
+  elements.progressBig.textContent = `${formatMaybeNumber(done)} / ${formatMaybeNumber(total)}`;
+  elements.progressBigLabel.textContent = label;
+  if (state.stopRequested) {
+    elements.progressEta.textContent = "Stopping\u2026";
+  } else if (state.paused) {
+    elements.progressEta.textContent = "Paused";
+  } else {
+    elements.progressEta.textContent = etaText(etaCompleted, etaTotal);
+  }
+  elements.progressQueued.textContent = `${formatMaybeNumber(Math.max(0, total - done))} queued`;
+}
+
+function setRunStatusLine() {
+  const percent = state.totalWork ? Math.round((state.completedWork / state.totalWork) * 100) : 0;
   if (state.stopRequested) {
     setStatus("Stopping crawl");
   } else if (state.paused) {
     setStatus("Crawl paused");
   } else {
-    setStatus(total ? `Crawling\u2026 ${percent}%` : "");
+    setStatus(state.totalWork ? `Crawling\u2026 ${percent}%` : "");
   }
-  updateRunControlButtons();
 }
 
-function progressText(completed, total) {
-  if (!total) {
-    return "";
-  }
+function clearIdleBar(rowEl, fillEl, countEl) {
+  rowEl.hidden = false;
+  rowEl.classList.remove("is-off", "is-pending");
+  fillEl.style.width = "0%";
+  countEl.textContent = "\u2014";
+}
 
-  const phase = state.currentPhase ? `${state.currentPhase}. ` : "";
+function renderProgress() {
+  const p = state.progress;
+  const stage = state.runStage;
+
+  if (!stage || stage === "idle") {
+    elements.progressWrap.classList.add("is-idle");
+    elements.genericRow.hidden = true;
+    elements.progressMainBars.classList.remove("is-generic");
+    elements.progressStep.innerHTML = '<span class="step-pill">Ready</span> Run a check to track progress';
+    elements.progressBig.textContent = "\u2014";
+    elements.progressBigLabel.textContent = "pages";
+    elements.progressQueued.textContent = "\u2014 queued";
+    elements.progressEta.textContent = "\u2014 left";
+    clearIdleBar(elements.pagesRow, elements.pagesFill, elements.pagesCount);
+    clearIdleBar(elements.linksRow, elements.linksFill, elements.linksCount);
+    clearIdleBar(elements.imagesRow, elements.imagesFill, elements.imagesCount);
+    return;
+  }
+  elements.progressWrap.classList.remove("is-idle");
+
+  const generic = stage === "retry";
+
+  elements.pagesRow.hidden = generic;
+  elements.linksRow.hidden = generic;
+  elements.imagesRow.hidden = generic;
+  elements.genericRow.hidden = !generic;
+  elements.progressMainBars.classList.toggle("is-generic", generic);
+
+  const hasAssetPhase = state.settings.checkLinks || state.settings.checkImages;
+  let stepHtml;
   if (state.stopRequested) {
-    return `Stopping. ${completed} of ${total} items checked. Partial results will remain available.`;
+    stepHtml = "Stopping\u2026";
+  } else if (state.paused) {
+    stepHtml = state.pauseReason ? `Paused \u2014 ${escapeHtml(state.pauseReason)}` : "Paused";
+  } else if (generic) {
+    stepHtml = "Retrying error rows";
+  } else if (stage === "assets") {
+    const label = assetStageLabel();
+    stepHtml = hasAssetPhase ? `<span class="step-pill">Step 2 of 2</span> ${label}` : label;
+  } else if (stage === "pages") {
+    stepHtml = hasAssetPhase ? '<span class="step-pill">Step 1 of 2</span> Checking pages' : "Checking pages";
+  } else {
+    stepHtml = "Preparing\u2026";
+  }
+  elements.progressStep.innerHTML = stepHtml;
+
+  if (generic) {
+    const pct = state.totalWork ? Math.round((state.completedWork / state.totalWork) * 100) : 0;
+    elements.genericFill.style.width = `${pct}%`;
+    elements.genericCount.textContent = `${formatMaybeNumber(state.completedWork)} / ${formatMaybeNumber(state.totalWork)}`;
+    renderProgressSide(state.completedWork, state.totalWork, "retried", state.completedWork, state.totalWork);
+    setRunStatusLine();
+    return;
   }
 
-  if (state.paused) {
-    const reason = state.pauseReason ? `${state.pauseReason} ` : "";
-    return `Paused. ${reason}${completed} of ${total} items checked. Partial results can be copied or exported.`;
+  setProgressBar(elements.pagesRow, elements.pagesFill, elements.pagesCount, {
+    enabled: true,
+    discovered: true,
+    done: p.pages.done,
+    total: p.pages.total
+  });
+  setProgressBar(elements.linksRow, elements.linksFill, elements.linksCount, p.links);
+  setProgressBar(elements.imagesRow, elements.imagesFill, elements.imagesCount, p.images);
+
+  if (stage === "assets") {
+    const done = p.links.done + p.images.done;
+    const total = p.links.total + p.images.total;
+    const unit = state.settings.checkLinks && state.settings.checkImages
+      ? "assets"
+      : (state.settings.checkLinks ? "links" : "images");
+    renderProgressSide(done, total, unit, state.completedWork, state.totalWork);
+  } else {
+    renderProgressSide(p.pages.done, p.pages.total, "pages", state.completedWork, state.totalWork);
   }
 
-  return `${phase}${completed} of ${total} items checked. ${estimateRemainingText(completed, total)}`;
-}
-
-function estimateRemainingText(completed, total) {
-  if (!total) {
-    return "";
-  }
-
-  if (!completed || !state.runStartedAt) {
-    return "Estimated time remaining: calculating.";
-  }
-
-  const elapsedMs = performance.now() - state.runStartedAt;
-  const remainingMs = Math.max(0, (elapsedMs / completed) * (total - completed));
-  return `Estimated time remaining: ${formatEstimatedDuration(remainingMs)}.`;
+  setRunStatusLine();
 }
 
 function setRunPhase(phase) {
@@ -3575,17 +3821,51 @@ function summarizeAssetResults() {
   return parts.join("; ");
 }
 
+
+function renderSummaryPlaceholderMetric(metric) {
+  const button = document.createElement("button");
+  button.className = "summary-metric is-placeholder";
+  button.type = "button";
+  button.disabled = true;
+  button.innerHTML = `<strong>\u2014</strong><span>${escapeHtml(metric.label)}</span><small>${escapeHtml(metric.detail)}</small>`;
+  return button;
+}
+
+function renderSummaryPlaceholderBreakdown(title, items) {
+  const section = document.createElement("section");
+  section.className = "summary-breakdown is-placeholder";
+  const header = document.createElement("div");
+  header.className = "summary-breakdown-header";
+  header.innerHTML = `<span>${escapeHtml(title)}</span><span class="summary-breakdown-total">\u2014</span>`;
+  section.append(header);
+  const legend = document.createElement("div");
+  legend.className = "summary-legend";
+  items.forEach((item) => {
+    const row = document.createElement("span");
+    row.className = "summary-legend-button is-placeholder";
+    const dot = document.createElement("span");
+    dot.className = "summary-dot";
+    dot.dataset.tone = item.tone || "muted";
+    const label = document.createElement("span");
+    label.textContent = item.label;
+    const count = document.createElement("span");
+    count.className = "summary-count";
+    count.textContent = "\u2014";
+    row.append(dot, label, count);
+    legend.append(row);
+  });
+  section.append(legend);
+  return section;
+}
+
 function renderSummaryPanel() {
   const hasRows = state.rows.length > 0;
   elements.summaryPanel.hidden = false;
   if (!hasRows) {
     state.summaryShown = false;
-    elements.summaryPanelLine.textContent = "Run a check to populate summary metrics.";
-    const empty = document.createElement("div");
-    empty.className = "summary-empty";
-    empty.textContent = "Summary metrics will appear here after a crawl finishes or is stopped.";
-    elements.summaryMetrics.replaceChildren(empty);
-    elements.summaryBreakdowns.replaceChildren();
+    elements.summaryPanelLine.textContent = "Run a check to populate these metrics.";
+    elements.summaryMetrics.replaceChildren(...SUMMARY_PLACEHOLDER_METRICS.map(renderSummaryPlaceholderMetric));
+    elements.summaryBreakdowns.replaceChildren(...SUMMARY_PLACEHOLDER_BREAKDOWNS.map((b) => renderSummaryPlaceholderBreakdown(b.title, b.items)));
     renderPanelStates();
     return;
   }
@@ -4142,9 +4422,10 @@ function applySettingsAvailability() {
     elements.collapseResponsiveImagesInput,
     elements.dedupeLinksInput,
     elements.autoRetryErrorsInput,
+    elements.keepAwakeInput,
     elements.ignoreNavInput,
+    elements.checkExternalLinksInput,
     elements.ignoreFooterInput,
-    elements.diagnosticModeInput,
     elements.extractionModeInput,
     elements.openInactiveInput,
     elements.useDedicatedRenderWindowInput,
@@ -4170,8 +4451,7 @@ function applySettingsAvailability() {
   [
     elements.themePreferenceInput,
     elements.timeDisplayUnitInput,
-    elements.resultsDensityInput,
-    elements.diagnosticsPanelInput
+    elements.resultsDensityInput
   ].forEach((input) => {
     setSettingsControlDisabled(input, false);
   });
@@ -4189,11 +4469,8 @@ function applySettingsAvailability() {
   });
 
   [
-    elements.modeChip,
     elements.linksChip,
-    elements.imagesChip,
-    elements.navChip,
-    elements.footerChip
+    elements.imagesChip
   ].forEach((button) => {
     setSettingsButtonDisabled(button, state.running, lockedTitle);
   });
@@ -4220,11 +4497,14 @@ function setControls() {
   elements.loadSourceButton.classList.toggle("is-loading", state.loadingInputSource);
   elements.loadSourceButton.setAttribute("aria-busy", String(state.loadingInputSource));
   elements.loadSourceButton.title = state.loadingInputSource ? "Fetching URLs" : "Fetch URLs";
-  elements.sourceUrlInput.disabled = !sourceMode || state.running || state.loadingInputSource;
+  // In list mode the field is a read-only "click to upload" trigger, so it must stay
+  // enabled (disabled inputs do not fire click events); it is read-only via renderInputMode.
+  elements.sourceUrlInput.disabled = state.running || state.loadingInputSource;
   elements.exportButton.disabled = !canUseRows;
   elements.exportSummaryButton.disabled = !canUseRows;
   elements.copyResultsButton.disabled = !canUseRows;
   elements.copySummaryButton.disabled = !canUseRows;
+  elements.copyAiSummaryButton.disabled = !canUseRows;
   elements.filterButton.disabled = !canUseRows;
   updateRetryErrorsButton();
   elements.copyDiagnosticsButton.disabled = !state.runDiagnostics.length;
@@ -4276,7 +4556,7 @@ function clearAll() {
   state.runDiagnostics = [];
   state.summaryShown = false;
   state.panelCollapsed.summary = false;
-  state.panelCollapsed.diagnostics = state.settings.diagnosticsPanelDefault !== "expanded";
+  state.panelCollapsed.diagnostics = false;
   state.lastRunDurationMs = 0;
   state.currentPhase = "";
   state.hideSkipped = false;
@@ -4359,31 +4639,43 @@ function openStoreListing() {
   window.open(CHROME_WEB_STORE_LISTING_URL, "_blank", "noopener");
 }
 
-async function copyStoreListingLink() {
-  await navigator.clipboard.writeText(CHROME_WEB_STORE_LISTING_URL);
-  flashIconButton(elements.shareStoreListingButton, "Copied listing link");
-}
-
-function setupAboutSection() {
-  if (elements.aboutVersion) {
-    elements.aboutVersion.textContent = appManifest().version || "dev";
-  }
-  if (elements.aboutWhatsNewList) {
-    elements.aboutWhatsNewList.replaceChildren();
-    WHATS_NEW.forEach((item) => {
-      const li = document.createElement("li");
-      li.textContent = item;
-      elements.aboutWhatsNewList.append(li);
-    });
-  }
-  if (elements.openChangelogButton) {
-    if (CHANGELOG_URL) {
-      elements.openChangelogButton.hidden = false;
-      elements.openChangelogButton.addEventListener("click", () => openExternalUrl(CHANGELOG_URL));
-    } else {
-      elements.openChangelogButton.hidden = true;
+async function shareStoreListing() {
+  const url = CHROME_WEB_STORE_LISTING_URL;
+  if (navigator.share) {
+    try {
+      await navigator.share({
+        title: "BulkStatus - Bulk URL Checker",
+        text: "BulkStatus - a Chrome extension for bulk URL checking.",
+        url
+      });
+      return;
+    } catch (error) {
+      if (error && error.name === "AbortError") {
+        return;
+      }
+      // Share sheet unavailable or failed — fall back to copying the link.
     }
   }
+  try {
+    await navigator.clipboard.writeText(url);
+    flashIconButton(elements.shareStoreListingButton, "Copied listing link");
+    showToast("Listing link copied to clipboard");
+  } catch (error) {
+    showToast("Couldn't share the link");
+  }
+}
+
+function showToast(message) {
+  const toast = elements.appToast;
+  if (!toast) {
+    return;
+  }
+  toast.textContent = message;
+  toast.hidden = false;
+  window.clearTimeout(toast._hideTimer);
+  toast._hideTimer = window.setTimeout(() => {
+    toast.hidden = true;
+  }, 1800);
 }
 
 function openExternalUrl(url) {
@@ -4447,17 +4739,135 @@ function bindUpdateNotice() {
     elements.updateBannerDismiss.addEventListener("click", markUpdateSeen);
   }
   if (elements.updateBannerLink) {
-    elements.updateBannerLink.addEventListener("click", () => {
-      openSettings();
-      if (elements.aboutVersion) {
-        elements.aboutVersion.closest(".about-section")?.scrollIntoView({ behavior: "smooth", block: "center" });
-      }
-      markUpdateSeen();
-    });
+    if (CHANGELOG_URL) {
+      elements.updateBannerLink.hidden = false;
+      elements.updateBannerLink.addEventListener("click", () => {
+        openExternalUrl(CHANGELOG_URL);
+        markUpdateSeen();
+      });
+    } else {
+      elements.updateBannerLink.hidden = true;
+    }
   }
   if (elements.settingsBand) {
     elements.settingsBand.addEventListener("change", markUpdateSeen);
   }
+}
+
+function bindVersionLink() {
+  if (!elements.versionLabel || !GITHUB_REPO_URL) {
+    return;
+  }
+  elements.versionLabel.classList.add("version-link");
+  elements.versionLabel.setAttribute("role", "link");
+  elements.versionLabel.setAttribute("tabindex", "0");
+  elements.versionLabel.title = "View BulkStatus on GitHub";
+  elements.versionLabel.addEventListener("click", () => openExternalUrl(GITHUB_REPO_URL));
+  elements.versionLabel.addEventListener("keydown", (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      openExternalUrl(GITHUB_REPO_URL);
+    }
+  });
+}
+
+function bindConfigTransfer() {
+  if (elements.exportConfigButton) {
+    elements.exportConfigButton.addEventListener("click", exportConfig);
+  }
+  if (elements.importConfigButton && elements.configFileInput) {
+    elements.importConfigButton.addEventListener("click", () => elements.configFileInput.click());
+    elements.configFileInput.addEventListener("change", handleConfigImport);
+  }
+}
+
+function exportConfig() {
+  saveSettingsFromInputs();
+  const payload = {
+    bulkstatusConfig: true,
+    version: currentAppVersion(),
+    exportedAt: new Date().toISOString(),
+    settings: state.settings
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `bulkstatus-config-${new Date().toISOString().slice(0, 10)}.json`;
+  link.click();
+  URL.revokeObjectURL(url);
+  flashButton(elements.exportConfigButton, "Exported");
+}
+
+function handleConfigImport(event) {
+  const file = event.target.files && event.target.files[0];
+  event.target.value = "";
+  if (!file) {
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const parsed = JSON.parse(String(reader.result || "{}"));
+      const incoming = parsed && parsed.settings ? parsed.settings : parsed;
+      if (!incoming || typeof incoming !== "object") {
+        throw new Error("Not a BulkStatus configuration file.");
+      }
+      state.settings = normalizeSettings({ ...getDefaultSettings(), ...incoming });
+      localStorage.setItem("bulkstatus-settings", JSON.stringify({ ...state.settings, settingsVersion: SETTINGS_VERSION }));
+      loadSettings();
+      updatePresetButtons();
+      applyColumnVisibility();
+      renderResults();
+      flashButton(elements.importConfigButton, "Imported");
+    } catch (_error) {
+      flashButton(elements.importConfigButton, "Invalid file");
+    }
+  };
+  reader.readAsText(file);
+}
+
+function setSettingsTab(name) {
+  elements.settingsTabButtons.forEach((button) => {
+    const active = button.dataset.settingsTab === name;
+    button.classList.toggle("is-active", active);
+    button.setAttribute("aria-selected", String(active));
+  });
+  elements.settingsTabPanels.forEach((panel) => {
+    panel.hidden = panel.dataset.settingsTab !== name;
+  });
+}
+
+function bindSettingsTabs() {
+  elements.settingsTabButtons.forEach((button) => {
+    button.addEventListener("click", () => setSettingsTab(button.dataset.settingsTab));
+  });
+}
+
+function bindAppLinks() {
+  if (elements.openGithubButton) {
+    elements.openGithubButton.disabled = !GITHUB_REPO_URL;
+    elements.openGithubButton.addEventListener("click", () => openExternalUrl(GITHUB_REPO_URL));
+  }
+  if (elements.reportIssueButton) {
+    elements.reportIssueButton.disabled = !GITHUB_ISSUES_URL;
+    elements.reportIssueButton.addEventListener("click", () => openExternalUrl(GITHUB_ISSUES_URL));
+  }
+  if (elements.rateExtensionButton) {
+    elements.rateExtensionButton.addEventListener("click", () => openExternalUrl(CHROME_WEB_STORE_LISTING_URL));
+  }
+}
+
+async function copyAiSummaryPrompt() {
+  const prompt = [
+    "You are an SEO and website-health analyst. Below is a bulk URL crawl summary from the BulkStatus Chrome extension.",
+    "Review it and give a concise, prioritized list of issues and recommended fixes \u2014 status errors, broken links/images, redirects, and on-page metadata gaps. Call out anything that could affect search or AI/answer-engine discoverability.",
+    "",
+    "Crawl summary:",
+    summaryCsv()
+  ].join("\n");
+  await navigator.clipboard.writeText(prompt);
+  flashButton(elements.copyAiSummaryButton, "Prompt copied");
 }
 
 async function copySummary() {
@@ -4534,7 +4944,6 @@ function diagnosticsPayload() {
       timeoutMs: state.settings.timeoutMs,
       timeDisplayUnit: state.settings.timeDisplayUnit,
       resultsDensity: state.settings.resultsDensity,
-      diagnosticsPanelDefault: state.settings.diagnosticsPanelDefault,
       delayPerAssetMs: state.settings.linkDelayMs,
       maxInputUrls: state.settings.maxInputUrls,
       maxDiscoveredAssets: state.settings.maxDiscoveredAssets,
@@ -4657,7 +5066,6 @@ function summaryCsvRows() {
     ["Run detail", "Check nav links", settings.ignoreNav ? "Off" : "On", ""],
     ["Run detail", "Check footer links", settings.ignoreFooter ? "Off" : "On", ""],
     ["Run detail", "Results density", settings.resultsDensity, "Results table display density"],
-    ["Run detail", "Diagnostics panel default", settings.diagnosticsPanelDefault, "Controls default Diagnostics panel visibility only"],
     ["Run detail", "Browser session for rendered checks", settings.useBrowserSessionForRenderedChecks ? "On" : "Off", "Uses Chrome login cookies for JavaScript-rendered checks"],
     ["Run detail", "Dedicated render window", settings.useDedicatedRenderWindow ? "On" : "Off", "Keeps JavaScript-rendered crawl tabs separate from the main Chrome window"],
     ["Run detail", "Input URL limit", settings.maxInputUrls, "Maximum pasted/uploaded page URLs checked in one run"],
@@ -4816,6 +5224,11 @@ function toggleSettings() {
 function openSettings() {
   elements.settingsBand.hidden = false;
   elements.settingsButton.setAttribute("aria-pressed", "true");
+  // Settings open near the top, so bring the panel into view in case the user
+  // clicked the icon while scrolled down (otherwise the click looks like a no-op).
+  requestAnimationFrame(() => {
+    elements.settingsBand.scrollIntoView({ behavior: "smooth", block: "start" });
+  });
 }
 
 function closeSettings() {

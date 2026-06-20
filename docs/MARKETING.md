@@ -31,7 +31,7 @@ sources teams actually have — pasted lists, XML sitemaps, and llms.txt.
 - Subhead: Run focused crawls, review summary metrics, sort/filter results, and export CSV findings directly from Chrome.
 
 **Small (440×280)**
-- BulkStatus — Bulk URL Checker
+- BulkStatus — Bulk URL Checker & Crawler
 - Check links, redirects, status & SEO metadata in bulk — export to CSV.
 
 ## Short blurbs (for outreach, posts, README intro)

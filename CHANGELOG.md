@@ -2,13 +2,32 @@
 
 All notable BulkStatus changes should be recorded here before packaging a new Chrome Web Store upload.
 
+## Unreleased
+
+Targeted for the 1.0.0 public release.
+
+- Renamed to "BulkStatus - Bulk URL Checker & Crawler" and refreshed the store and README copy to cover crawling, SEO, and AI/search visibility (including llms.txt), without changing what the extension does.
+- Redesigned the in-progress view: pages, links, and images each get their own compact, color-coded bar (matching the Summary), with one status line for checked/queued/estimated time and clear "Step 1 of 2 / Step 2 of 2" phases.
+- Added an idle preview of the progress area before a crawl, so it is clear where status, counts, and time remaining will appear.
+- Color-coded the Results "Type" labels (page, link, image) to match the Summary legend.
+- Added a full-screen Results view (expand icon in the Results header; Esc or the icon to exit) for reviewing large result sets.
+- Added a slim footer with version (links to the changelog), GitHub, issue reporting, and privacy, plus a "back to top" control (a footer link and a floating button that appears after scrolling).
+- Matched the URL input box's resize handle and scrollbar styling to the Results table for a consistent feel.
+- Fixed the URL-list "click to upload" field so clicking it opens the file picker (previously only the Upload button worked).
+- Opening Settings now scrolls the panel into view when triggered from lower on the page.
+
 ## 0.1.36 - 2026-06-16
 
 - Replaced the extension icon with a bold "line item status" design (green check over red x on a two-page stack) that reflects bulk pass/fail checking and stays legible at 16 px. Regenerated icon assets at 16, 32, 48, and 128 px and updated the source SVG.
 - Refactored the app's pure helpers (URL, text, sitemap/llms parsing, status, and duration logic) into ES modules under `src/app/lib/` and loaded `app.js` as a module; runtime behavior is unchanged.
 - Added a dependency-free unit test suite (`npm test`) covering the extracted helpers, plus an ESLint flat config (`npm run lint`).
-- Added an in-app "What's new" notice: after an update, a small dismissible banner appears in the app (no new tab, no new permissions) and auto-dismisses once settings are adjusted.
-- Added an About section in Settings showing the current version and recent highlights, with an optional changelog link.
+- Added an in-app "What's new" notice: after an update, a small dismissible banner appears in the app (no new tab, no new permissions), auto-dismisses once settings are adjusted, and links to the GitHub changelog.
+- Made the Settings version label a link to the project's GitHub repository.
+- Added Export/Import of crawl configuration as a JSON file, so teams can share a consistent setup.
+- Reorganized Settings into tabs (Extraction & Speed, Checks & Filtering, Results Columns, App) so it is no longer one long wall of options.
+- Added an "About & help" group in the App tab with links to the GitHub repository, issue reporting, and the store rating page.
+- Added a "Copy AI summary" button to the Summary panel that copies a framed analyst prompt plus the crawl summary, ready to paste into an AI assistant.
+- Moved Diagnostics out of the main window into its own Settings tab (data is still always collected); it no longer takes space in the standard crawl view.
 - URL list input now ignores blank lines and `#` comment lines, so annotated or commented URL lists can be pasted directly.
 - Summary metric cards are now clear toggles: the default "All results" card no longer shows as selected when nothing is filtered, and clicking an active filter card again clears it (back to all results).
 - Clicking a summary card no longer auto-expands the filter panel over the table; it keeps the filtered results in view and scrolls them into focus, so table changes are obvious.
@@ -171,31 +190,4 @@ All notable BulkStatus changes should be recorded here before packaging a new Ch
 - Changed default quick settings to JavaScript rendering, links, and images enabled while leaving nav/footer link checks off by default.
 - Added pause/resume and stop controls to long-running crawls, with partial results available while paused or after stopping.
 - Added Summary and Diagnostics containers with copy/export options.
-- Changed Summary wording from row-based language to checked items/pages/links/images and fixed successful rendered pages being counted as issues.
-- Updated Summary empty-state copy to clarify that stopped crawls can also populate metrics.
-- Kept Summary metric tiles readable during active crawls while preserving muted styling for zero-count tiles after completion.
-- Slimmed the Results table scrollbar styling.
-- Reworked progress controls so pause/stop buttons sit beside the progress bar and the pause button switches to a play icon while paused.
-- Fixed a CSS specificity conflict that caused pause/stop controls to wrap below the progress bar.
-- Replaced the first-100 Results preview with top and bottom pagination controls, page range text, per-page sizing, and Show all pages/Collapse.
-- Moved pagination into a compact table toolbar with `Page rows` range text, grouped previous/next controls, `100/page` sizing, and Show all/Collapse.
-- Updated the app header so only `BulkStatus` is bold and `Bulk URL Checker` reads as a lighter descriptor.
-- Updated store listing reference content for Chrome Web Store submissions.
-
-## 0.1.11 - 2026-06-04
-
-- Updated the Chrome Web Store and manifest name to `BulkStatus - Bulk URL Checker`.
-- Added configurable input URL and discovered asset limits.
-- Added store listing reference content for Chrome Web Store submissions.
-- Removed the unused Chrome `storage` permission from the manifest.
-- Reorganized the project so Chrome upload files live under `extension/`.
-
-## 0.1.10
-
-- Added Results filters, 404-focused view, sortable columns, and diagnostics export.
-- Added quick configuration chips in the input header.
-- Added broader nav/footer link classification patterns.
-
-## 0.1.0
-
-- Initial BulkStatus prototype with pasted/uploaded URL checks, metadata extraction, results table, CSV export, and configurable check settings.
+- Changed Summary wording from row-based language to checked items/pages/links/

@@ -2,44 +2,61 @@
 
 ## Current Package Version
 
-0.1.35
+0.1.36
 
 ## Title
 
-BulkStatus - Bulk URL Checker
+BulkStatus - Bulk URL Checker & Crawler
 
 ## Short Description
 
-Bulk URL status, redirect, metadata, link, image, sitemap, and llms.txt checks for web teams.
+Crawl & bulk-check URLs for status codes, broken links, redirects, images & SEO metadata — from a sitemap, llms.txt, or list.
 
 ## Description
 
-BulkStatus helps web teams and digital marketing teams check groups of URLs quickly from a focused Chrome extension interface.
+Check large batches of URLs in seconds, right inside Chrome. BulkStatus is for web, SEO, and content teams who need to verify status codes, catch broken links and images, confirm redirects, and audit on-page metadata across many pages at once.
 
-Paste URLs, upload a TXT/CSV file, or fetch URLs from an XML sitemap, sitemap index, or llms.txt file. Review the URL list, run a check, scan Summary metrics, review paginated Results, and export findings for reporting.
+Give it URLs three ways: paste a list or upload a TXT/CSV, point it at an XML sitemap or sitemap index, or load an llms.txt file. Review the list, run the check, then read the Summary metrics and a sortable, filterable Results table. Export everything to CSV for reporting.
 
-BulkStatus can report HTTP status, final redirected URL, redirect count, response time, page title, meta description, H1, canonical URL, meta robots, word count, and fetch/audit errors.
+For every URL, BulkStatus reports HTTP status, the final URL after redirects, redirect count, response time, page title, meta description, H1, canonical URL, meta robots, and word count, plus any fetch or audit errors.
 
-Optional discovered link and image checks help identify non-200 URLs, redirects, 404s, 403s, missing image alt text, and skipped nav/footer items. JavaScript rendering can be enabled when a page needs Chrome rendering to reveal links or images that are not present in static HTML.
+Turn on optional link and image checks to crawl the links and images each page contains and surface non-200 URLs, 404s, 403s, redirects, and missing image alt text. Nav and footer items are classified so you can include or skip them. When a page needs a real browser to render its links and images, switch on JavaScript rendering, including pages behind your existing Chrome login.
+
+Care how AI reads your site? If you publish an llms.txt or want your pages surfaced in AI search and answer engines, BulkStatus confirms those pages return clean status codes, resolve their redirects, and carry the title, description, and canonical tags that search and AI systems depend on — the groundwork behind SEO, answer-engine optimization (AEO), and generative-engine optimization (GEO).
+
+You stay in control of the crawl: pause, resume, or stop at any time with partial results kept, and tune concurrency, timeouts, and URL/asset limits. Speed and timing edits apply live to the remaining checks.
+
+Everything runs locally in your browser. No backend, no analytics, no account, and nothing leaves Chrome unless you copy or export it.
+
+Common uses: bulk URL status checks, broken-link audits, redirect mapping, post-migration QA, sitemap and llms.txt validation, technical SEO crawls, and pre-launch checks for search and AI visibility.
 
 Key features:
 
-- Bulk URL checks from pasted URLs or TXT/CSV upload
-- URL fetching from XML sitemap, sitemap index, or llms.txt sources
-- HTTP status, final URL, redirects, response time, and page metadata
-- Optional discovered link and image checking
-- HTML fetch mode or JavaScript rendering mode
+- Bulk URL checks from a pasted list or TXT/CSV upload
+- Crawl URLs from an XML sitemap, sitemap index, or llms.txt source
+- HTTP status, final URL, redirects, response time, and full page metadata
+- Optional link and image crawling, with missing-alt detection
+- Fast HTML mode or thorough JavaScript rendering mode
 - Browser-session support for JavaScript-rendered checks behind login
 - Optional dedicated render window for JavaScript-rendered crawls
-- Configurable input URL limits, discovered asset limits, speed, timeouts, nav/footer handling, and table columns
-- Paused-crawl speed and timing adjustments that apply to remaining checks
-- Quick configuration controls for JavaScript rendering, images, links, nav links, and footer links
-- Paginated, sortable Results table with filters for status, type, area, issues, redirects, skipped rows, 404s, and search
+- Configurable input URL limits, discovered-asset limits, concurrency, timeouts, and nav/footer handling
+- Pause, resume, and stop long-running crawls, with partial results retained
+- Paginated, sortable Results table with filters for status, type, area, issues, redirects, skipped rows, and 404s
 - Summary metrics with copy/export options
-- Pause, resume, and stop controls for long-running crawls, with partial results available
-- CSV export, copy results, and downloadable diagnostics for troubleshooting
+- CSV export, copy results/summary, and downloadable diagnostics for troubleshooting
+- Private by design: local-only, no backend, no analytics, no account
 
 BulkStatus only runs when the user intentionally provides or fetches URLs and clicks Run Check. It does not monitor browsing activity, run automatically on websites, use remote code, or send results to an external backend.
+
+## GitHub Repository
+
+Repository description (the "About" blurb on GitHub):
+
+> Bulk URL checker and crawler for Chrome — check status codes, broken links, redirects, images, and SEO metadata from a list, XML sitemap, or llms.txt. Runs locally, no backend.
+
+Topics (add under the repo "About" → topics; these carry keywords without stuffing prose):
+
+`chrome-extension`, `bulk-url-checker`, `url-checker`, `broken-link-checker`, `link-checker`, `web-crawler`, `http-status`, `status-code`, `redirect-checker`, `sitemap`, `llms-txt`, `seo`, `technical-seo`, `seo-audit`, `aeo`, `geo`, `ai-search`, `ai-visibility`, `image-checker`, `manifest-v3`
 
 ## Category
 
@@ -51,7 +68,17 @@ English
 
 ## Suggested Release Notes
 
-Version 0.1.35 clarifies Summary counts, separates status issues from redirects and page metadata issues, and keeps discovered-but-unchecked links/images visible when a crawl is stopped.
+(Use the per-version notes from CHANGELOG.md at publish time.)
+
+## Screenshots (recommended order)
+
+Lead with the payoff, end with configurability. Use the 1280x800 marketing variants.
+
+1. Results table — sortable/filterable rows with statuses, redirects, and issues (the payoff)
+2. Summary metrics after a crawl — the at-a-glance health view
+3. Inputs & quick configuration — URL list / XML sitemap / llms.txt sources
+4. Settings — configurable checks, speed, extraction mode, and columns
+5. Dark mode — same results view, showing polish and accessibility
 
 ## Privacy Summary
 
@@ -89,11 +116,3 @@ Primary extension icons are in:
 - `extension/assets/icons/icon-128.png`
 
 Use `extension/assets/icons/icon-128.png` for the 128 x 128 store icon unless a separate promotional tile is created later.
-
-Recommended screenshots:
-
-- Inputs & Quick Configuration with URL list, XML sitemap, or llms.txt source visible
-- Summary metrics after a crawl
-- Results table with pagination, filters, and sortable columns
-- Settings panel showing configurable checks, speed, extraction mode, and table columns
-- Diagnostics panel showing version/environment details and download option

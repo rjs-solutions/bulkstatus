@@ -1,6 +1,6 @@
-# BulkStatus — Bulk URL Checker
+# BulkStatus — Bulk URL Checker & Crawler
 
-Bulk URL health checks, built for web teams — without leaving Chrome.
+Crawl and bulk-check URLs for status codes, broken links, redirects, images, and SEO metadata — built for web teams, without leaving Chrome.
 
 BulkStatus turns a list of URLs into an audit. Paste them, upload a TXT/CSV, or point it at
 an XML sitemap or `llms.txt` file, then run a check to see HTTP status, final redirected
@@ -18,6 +18,7 @@ runs in your browser; nothing is sent to a server.
 - **Find what's broken** — non-200s, 404s, 403s, redirects, and missing image alt text.
 - **See the redirect truth** — final URL after redirects, with best-effort hop counts.
 - **Audit on-page SEO** — title, meta description, H1, canonical, meta robots, word count.
+- **AI & search ready** — validate the pages in your sitemap and `llms.txt` so search and AI crawlers can reach them; the groundwork behind SEO, AEO, and GEO.
 - **Render when needed** — JavaScript mode reads client-rendered links and images.
 - **Stay in control** — pause/resume/stop long crawls; tune concurrency, timeouts, limits.
 - **Export the proof** — CSV export plus copy for summary and results.

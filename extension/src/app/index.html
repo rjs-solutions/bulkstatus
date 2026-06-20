@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>BulkStatus - Bulk URL Checker</title>
+    <title>BulkStatus - Bulk URL Checker & Crawler</title>
     <link rel="stylesheet" href="styles.css">
   </head>
   <body>
@@ -12,16 +12,17 @@
         <div class="brand-zone">
           <img class="brand-icon" src="../../assets/icons/icon-48.png" alt="" width="36" height="36">
           <div>
-            <h1><span class="app-name">BulkStatus</span> <span class="app-descriptor">- Bulk URL Checker</span></h1>
+            <h1><span class="app-name">BulkStatus</span> <span class="app-descriptor">- Bulk URL Checker & Crawler</span></h1>
           </div>
         </div>
         <div class="header-actions" aria-label="Tool actions">
           <button class="icon-button" id="openStoreListingButton" type="button" title="Open Chrome Web Store listing" aria-label="Open Chrome Web Store listing">
-            <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
+            <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M3 9V5.5A1.5 1.5 0 0 1 4.5 4h15A1.5 1.5 0 0 1 21 5.5V9"/><path d="M5 11v8a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-8"/><path d="M10 20v-4a2 2 0 0 1 4 0v4"/><path d="M2 9h20"/><path d="M7 9a2.5 2.5 0 0 1-5 0M12 9a2.5 2.5 0 0 1-5 0M17 9a2.5 2.5 0 0 1-5 0M22 9a2.5 2.5 0 0 1-5 0"/></svg>
           </button>
-          <button class="icon-button" id="shareStoreListingButton" type="button" title="Copy Chrome Web Store listing link" aria-label="Copy Chrome Web Store listing link">
+          <button class="icon-button" id="shareStoreListingButton" type="button" title="Share BulkStatus" aria-label="Share BulkStatus">
             <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.59 13.51 6.83 3.98"/><path d="m15.41 6.51-6.82 3.98"/></svg>
           </button>
+          <span class="toolbar-divider" aria-hidden="true"></span>
           <div class="theme-group" role="group" aria-label="Theme">
             <button class="icon-button" id="themeLightButton" type="button" title="Use light theme" aria-label="Use light theme">
               <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="M4.93 4.93l1.41 1.41"/><path d="M17.66 17.66l1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="M4.93 19.07l1.41-1.41"/><path d="M17.66 6.34l1.41-1.41"/></svg>
@@ -65,383 +66,435 @@
         <div class="settings-run-note" id="pausedSettingsNotice" hidden>
           Crawl paused. Speed and timing changes apply to remaining checks only. Stop the crawl to change locked crawl behavior settings.
         </div>
-        <section class="settings-section presets-section" aria-labelledby="presetSettingsHeading">
+        <div class="settings-tabs" role="tablist" aria-label="Settings sections">
+          <button class="settings-tab is-active" type="button" role="tab" data-settings-tab="general">General</button>
+          <button class="settings-tab" type="button" role="tab" data-settings-tab="extraction">Crawling</button>
+          <button class="settings-tab" type="button" role="tab" data-settings-tab="checks">Checks</button>
+          <button class="settings-tab" type="button" role="tab" data-settings-tab="results">Results</button>
+        </div>
+        <div class="settings-panels">
+        <section class="settings-section general-section" data-settings-tab="general" aria-labelledby="generalHeading">
           <div class="settings-section-header">
-            <h3 id="presetSettingsHeading">Presets</h3>
+            <h3 id="generalHeading">General</h3>
           </div>
-          <div class="preset-list">
-            <button class="preset-button" type="button" data-preset="full-rendered">
-              <svg aria-hidden="true" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M8 21h8"/><path d="M12 18v3"/><path d="m10 9-2 2 2 2"/><path d="m14 9 2 2-2 2"/></svg>
-              <span class="preset-copy">
-                <strong>Full rendered scan</strong>
-                <span>JavaScript-rendered links and images.</span>
-              </span>
-            </button>
-            <button class="preset-button" type="button" data-preset="links">
-              <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.07 0l2.83-2.83a5 5 0 0 0-7.07-7.07L11.5 4.43"/><path d="M14 11a5 5 0 0 0-7.07 0L4.1 13.83a5 5 0 0 0 7.07 7.07l1.33-1.33"/></svg>
-              <span class="preset-copy">
-                <strong>Link audit</strong>
-                <span>JavaScript-rendered links.</span>
-              </span>
-            </button>
-            <button class="preset-button" type="button" data-preset="images">
-              <svg aria-hidden="true" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
-              <span class="preset-copy">
-                <strong>Image audit</strong>
-                <span>JavaScript-rendered images.</span>
-              </span>
-            </button>
-            <button class="preset-button" type="button" data-preset="fast">
-              <svg aria-hidden="true" viewBox="0 0 24 24"><path d="m13 2-9 13h7l-1 7 10-14h-7l1-6z"/></svg>
-              <span class="preset-copy">
-                <strong>Fast URL-only</strong>
-                <span>Static HTML, no discovered assets.</span>
-              </span>
-            </button>
+          <div class="settings-col">
+            <div class="settings-subsection">
+              <h4 class="settings-subhead">Preferences</h4>
+              <div class="settings-list app-preferences-list">
+                <label class="select-field">
+                  <span class="field-copy">
+                    <strong>Theme</strong>
+                    <small>Choose the app appearance. The header theme button uses this same setting.</small>
+                  </span>
+                  <select id="themePreferenceInput">
+                    <option value="light">Light</option>
+                    <option value="dark">Dark</option>
+                  </select>
+                </label>
+                <label class="select-field">
+                  <span class="field-copy">
+                    <strong>Time display</strong>
+                    <small>Show response timing and render wait in seconds or milliseconds.</small>
+                  </span>
+                  <select id="timeDisplayUnitInput">
+                    <option value="seconds">Seconds</option>
+                    <option value="milliseconds">Milliseconds</option>
+                  </select>
+                </label>
+              </div>
+            </div>
+            <div class="settings-subsection">
+              <h4 class="settings-subhead">Configuration</h4>
+              <p class="settings-subnote">Export your crawl settings to a file, or import a shared file to match a teammate's setup.</p>
+              <div class="config-transfer-actions">
+                <button class="secondary-button action-button" id="exportConfigButton" type="button">
+                  <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/></svg>
+                  <span>Export configuration</span>
+                </button>
+                <button class="secondary-button action-button" id="importConfigButton" type="button">
+                  <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="m17 8-5-5-5 5"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/></svg>
+                  <span>Import configuration</span>
+                </button>
+                <input id="configFileInput" type="file" accept="application/json,.json" hidden>
+              </div>
+            </div>
+            <div class="settings-subsection">
+              <h4 class="settings-subhead">About &amp; help</h4>
+              <p class="settings-subnote">Source code and changelog, where to report an issue, and a place to rate BulkStatus.</p>
+              <div class="config-transfer-actions">
+                <button class="secondary-button action-button" id="openGithubButton" type="button">
+                  <svg aria-hidden="true" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+                  <span>GitHub</span>
+                </button>
+                <button class="secondary-button action-button" id="reportIssueButton" type="button">
+                  <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                  <span>Report an issue</span>
+                </button>
+                <button class="secondary-button action-button" id="rateExtensionButton" type="button">
+                  <svg aria-hidden="true" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                  <span>Rate BulkStatus</span>
+                </button>
+              </div>
+              <span class="version-label" id="versionLabel">Version</span>
+            </div>
+          </div>
+          <div class="settings-col">
+            <div class="settings-subsection">
+              <h4 class="settings-subhead">Presets</h4>
+              <p class="settings-subnote">One-click starting points — adjust anything afterward in the other tabs.</p>
+              <div class="preset-list">
+                <button class="preset-row" type="button" data-preset="full-rendered" aria-pressed="false">
+                  <span class="preset-toggle" aria-hidden="true"></span>
+                  <span class="preset-copy"><strong>Full rendered scan</strong><span>Render JS, then check links and images.</span></span>
+                </button>
+                <button class="preset-row" type="button" data-preset="links" aria-pressed="false">
+                  <span class="preset-toggle" aria-hidden="true"></span>
+                  <span class="preset-copy"><strong>Link audit</strong><span>Render pages; check links only.</span></span>
+                </button>
+                <button class="preset-row" type="button" data-preset="images" aria-pressed="false">
+                  <span class="preset-toggle" aria-hidden="true"></span>
+                  <span class="preset-copy"><strong>Image audit</strong><span>Render pages; check images only.</span></span>
+                </button>
+                <button class="preset-row" type="button" data-preset="fast" aria-pressed="false">
+                  <span class="preset-toggle" aria-hidden="true"></span>
+                  <span class="preset-copy"><strong>Fast URL-only</strong><span>Static HTML only — fastest; skips JS and discovered assets.</span></span>
+                </button>
+              </div>
+            </div>
+            <div class="settings-subsection" id="diagnosticsPanel">
+              <h4 class="settings-subhead">Diagnostics</h4>
+              <p class="settings-subnote" id="diagnosticsSummary">Run a check to populate diagnostics.</p>
+              <div class="config-transfer-actions">
+                <button class="secondary-button action-button" id="copyDiagnosticsButton" type="button" disabled>
+                  <svg aria-hidden="true" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                  <span>Copy Diagnostics</span>
+                </button>
+                <button class="secondary-button action-button" id="downloadDiagnosticsButton" type="button" disabled>
+                  <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/></svg>
+                  <span>Download JSON</span>
+                </button>
+              </div>
+              <div class="panel-body diagnostics-body" id="diagnosticsBody" hidden>
+                <ol id="diagnosticsList"></ol>
+              </div>
+            </div>
           </div>
         </section>
-        <section class="settings-section app-preferences-section" aria-labelledby="appPreferencesHeading">
-          <div class="settings-section-header">
-            <h3 id="appPreferencesHeading">App preferences</h3>
-          </div>
-          <div class="settings-list app-preferences-list">
-            <label class="select-field">
-              <span class="field-copy">
-                <strong>Theme</strong>
-                <small>Choose the app appearance. The header theme button uses this same setting.</small>
-              </span>
-              <select id="themePreferenceInput">
-                <option value="light">Light</option>
-                <option value="dark">Dark</option>
-              </select>
-            </label>
-            <label class="select-field">
-              <span class="field-copy">
-                <strong>Time display</strong>
-                <small>Show response timing and render wait in seconds or milliseconds.</small>
-              </span>
-              <select id="timeDisplayUnitInput">
-                <option value="seconds">Seconds</option>
-                <option value="milliseconds">Milliseconds</option>
-              </select>
-            </label>
-            <label class="select-field">
-              <span class="field-copy">
-                <strong>Results density</strong>
-                <small>Adjust Results table text size and row spacing.</small>
-              </span>
-              <select id="resultsDensityInput">
-                <option value="comfortable">Comfortable</option>
-                <option value="compact">Compact</option>
-                <option value="dense">Dense</option>
-              </select>
-            </label>
-            <label class="select-field">
-              <span class="field-copy">
-                <strong>Diagnostics panel</strong>
-                <small>Choose whether Diagnostics starts expanded, collapsed, or hidden. Diagnostics are still collected.</small>
-              </span>
-              <select id="diagnosticsPanelInput">
-                <option value="expanded">Expanded</option>
-                <option value="collapsed">Collapsed</option>
-                <option value="hidden">Hidden</option>
-              </select>
-            </label>
-          </div>
-        </section>
-        <div class="settings-sections">
-          <section class="settings-section" aria-labelledby="scopeSettingsHeading">
+          <section class="settings-section" data-settings-tab="checks" aria-labelledby="scopeSettingsHeading" hidden>
             <div class="settings-section-header">
               <h3 id="scopeSettingsHeading">Checks and filtering</h3>
             </div>
             <div class="settings-list">
-              <label class="check-row">
-                <input id="checkLinksInput" type="checkbox">
-                <span class="check-mark" aria-hidden="true"></span>
-                <span class="check-copy">
-                  <strong>Page links</strong>
-                  <small>Check discovered URLs from anchors and data-link-url attributes.</small>
-                </span>
-              </label>
-              <label class="check-row">
-                <input id="checkImagesInput" type="checkbox">
-                <span class="check-mark" aria-hidden="true"></span>
-                <span class="check-copy">
-                  <strong>Images</strong>
-                  <small>Check image URLs from src, srcset, and common lazy-load attributes.</small>
-                </span>
-              </label>
-              <label class="check-row">
-                <input id="collapseResponsiveImagesInput" type="checkbox" checked>
-                <span class="check-mark" aria-hidden="true"></span>
-                <span class="check-copy">
-                  <strong>Collapse responsive image variants</strong>
-                  <small>Check one logical image when only size/format query parameters differ.</small>
-                </span>
-              </label>
-              <label class="check-row">
-                <input id="dedupeLinksInput" type="checkbox" checked>
-                <span class="check-mark" aria-hidden="true"></span>
-                <span class="check-copy">
-                  <strong>Reuse duplicate asset checks</strong>
-                  <small>Check each URL + area once, then apply that status everywhere it appears. Turn off to retest each occurrence.</small>
-                </span>
-              </label>
-              <label class="check-row">
-                <input id="autoRetryErrorsInput" type="checkbox" checked>
-                <span class="check-mark" aria-hidden="true"></span>
-                <span class="check-copy">
-                  <strong>Automatically retry errors</strong>
-                  <small>After a run finishes, retry rows that ended with Error and no HTTP status once.</small>
-                </span>
-              </label>
-              <label class="check-row">
-                <input id="ignoreNavInput" type="checkbox">
-                <span class="check-mark" aria-hidden="true"></span>
-                <span class="check-copy">
-                  <strong>Ignore nav</strong>
-                  <small>Leave nav assets visible as not checked.</small>
-                </span>
-              </label>
-              <label class="check-row">
-                <input id="ignoreFooterInput" type="checkbox">
-                <span class="check-mark" aria-hidden="true"></span>
-                <span class="check-copy">
-                  <strong>Ignore footer</strong>
-                  <small>Leave footer assets visible as not checked.</small>
-                </span>
-              </label>
-              <label class="check-row">
-                <input id="diagnosticModeInput" type="checkbox">
-                <span class="check-mark" aria-hidden="true"></span>
-                <span class="check-copy">
-                  <strong>Detailed diagnostics</strong>
-                  <small>Add page-level timing and discovery details to the diagnostics export.</small>
-                </span>
-              </label>
+              <div class="settings-group">
+                <div class="settings-subheading">Asset checks</div>
+                <label class="check-row">
+                  <input id="checkLinksInput" type="checkbox">
+                  <span class="check-mark" aria-hidden="true"></span>
+                  <span class="check-copy">
+                    <strong>Page links</strong>
+                    <small>Check discovered URLs from anchors and data-link-url attributes.</small>
+                  </span>
+                </label>
+                <label class="check-row">
+                  <input id="checkImagesInput" type="checkbox">
+                  <span class="check-mark" aria-hidden="true"></span>
+                  <span class="check-copy">
+                    <strong>Images</strong>
+                    <small>Check image URLs from src, srcset, and common lazy-load attributes.</small>
+                  </span>
+                </label>
+                <label class="check-row">
+                  <input id="collapseResponsiveImagesInput" type="checkbox" checked>
+                  <span class="check-mark" aria-hidden="true"></span>
+                  <span class="check-copy">
+                    <strong>Collapse responsive image variants</strong>
+                    <small>Check one image when copies differ only by size or format.</small>
+                  </span>
+                </label>
+                <label class="check-row">
+                  <input id="dedupeLinksInput" type="checkbox" checked>
+                  <span class="check-mark" aria-hidden="true"></span>
+                  <span class="check-copy">
+                    <strong>Reuse duplicate asset checks</strong>
+                    <small>Check each repeated link or image once and reuse the result. Turn off to recheck every occurrence.</small>
+                  </span>
+                </label>
+              </div>
+              <div class="settings-group">
+                <div class="settings-subheading">Link scope &amp; retries</div>
+                <label class="check-row">
+                  <input id="ignoreNavInput" type="checkbox">
+                  <span class="check-mark" aria-hidden="true"></span>
+                  <span class="check-copy">
+                    <strong>Include navigation</strong>
+                    <small>Check the links and images in the site's navigation. Repeated links are checked once.</small>
+                  </span>
+                </label>
+                <label class="check-row">
+                  <input id="ignoreFooterInput" type="checkbox">
+                  <span class="check-mark" aria-hidden="true"></span>
+                  <span class="check-copy">
+                    <strong>Include footer</strong>
+                    <small>Check the links and images in the page footer. Repeated links are checked once.</small>
+                  </span>
+                </label>
+                <label class="check-row">
+                  <input id="checkExternalLinksInput" type="checkbox" checked>
+                  <span class="check-mark" aria-hidden="true"></span>
+                  <span class="check-copy">
+                    <strong>Check external links</strong>
+                    <small>Check discovered links that point to other domains. Turn off to check same-site links only.</small>
+                  </span>
+                </label>
+                <label class="check-row">
+                  <input id="autoRetryErrorsInput" type="checkbox" checked>
+                  <span class="check-mark" aria-hidden="true"></span>
+                  <span class="check-copy">
+                    <strong>Automatically retry errors</strong>
+                    <small>After a run finishes, retry rows that ended with Error and no HTTP status once.</small>
+                  </span>
+                </label>
+              </div>
             </div>
           </section>
 
-          <section class="settings-section" aria-labelledby="performanceSettingsHeading">
+          <section class="settings-section" data-settings-tab="extraction" aria-labelledby="performanceSettingsHeading" hidden>
             <div class="settings-section-header">
               <h3 id="performanceSettingsHeading">Extraction and speed</h3>
             </div>
             <div class="settings-list split-settings-list">
-              <label class="select-field">
-                <span class="field-copy">
-                  <strong>Mode</strong>
-                  <small>Static is fastest. JavaScript loads pages to collect rendered links/images.</small>
-                </span>
-                <select id="extractionModeInput">
-                  <option value="static">Static HTML</option>
-                  <option value="rendered">Rendered JavaScript</option>
-                </select>
-              </label>
-              <label class="number-field">
-                <span class="field-copy">
-                  <strong>Page concurrency</strong>
-                  <small>Static HTML pages checked at once.</small>
-                </span>
-                <input id="pageConcurrencyInput" type="text" inputmode="numeric" value="4">
-              </label>
-              <label class="number-field rendered-setting">
-                <span class="field-copy">
-                  <strong>Rendered concurrency</strong>
-                  <small>Rendered tabs loaded at once. Lower is gentler.</small>
-                </span>
-                <input id="renderedConcurrencyInput" type="text" inputmode="numeric" value="1">
-              </label>
-              <label class="number-field rendered-setting">
-                <span class="field-copy">
-                  <strong id="renderWaitLabel">Render wait max sec</strong>
-                  <small id="renderWaitHelp">Maximum seconds after page load while waiting for rendered DOM stability. Supports up to 120 seconds.</small>
-                </span>
-                <input id="renderWaitInput" type="text" inputmode="decimal" value="3">
-              </label>
-              <label class="check-row rendered-setting">
-                <input id="openInactiveInput" type="checkbox" checked>
-                <span class="check-mark" aria-hidden="true"></span>
-                <span class="check-copy">
-                  <strong>Open tabs inactive</strong>
-                  <small>Rendered tabs do not steal focus.</small>
-                </span>
-              </label>
-              <label class="check-row rendered-setting">
-                <input id="useBrowserSessionInput" type="checkbox" checked>
-                <span class="check-mark" aria-hidden="true"></span>
-                <span class="check-copy">
-                  <strong>Use browser session</strong>
-                  <small>Use Chrome login cookies for rendered page, link, and image checks.</small>
-                </span>
-              </label>
-              <label class="check-row rendered-setting">
-                <input id="useDedicatedRenderWindowInput" type="checkbox">
-                <span class="check-mark" aria-hidden="true"></span>
-                <span class="check-copy">
-                  <strong>Use dedicated render window</strong>
-                  <small>Optional: keeps rendered crawl tabs in a separate Chrome window.</small>
-                </span>
-              </label>
-              <label class="check-row rendered-setting">
-                <input id="closeRenderedTabsInput" type="checkbox" checked>
-                <span class="check-mark" aria-hidden="true"></span>
-                <span class="check-copy">
-                  <strong>Close rendered tabs</strong>
-                  <small>Automatically close tabs after collection.</small>
-                </span>
-              </label>
-              <label class="number-field">
-                <span class="field-copy">
-                  <strong id="timeoutLabel">Timeout sec</strong>
-                  <small id="timeoutHelp">Applies to page, link, and image requests. Supports 1-60 seconds.</small>
-                </span>
-                <input id="timeoutInput" type="text" inputmode="decimal" value="10">
-              </label>
-              <label class="number-field">
-                <span class="field-copy">
-                  <strong>Input URL limit</strong>
-                  <small>Maximum input page URLs checked from paste, upload, sitemap, or llms.txt sources.</small>
-                </span>
-                <input id="maxInputUrlsInput" type="text" inputmode="numeric" value="10,000">
-              </label>
-              <label class="number-field">
-                <span class="field-copy">
-                  <strong>Discovered asset limit</strong>
-                  <small>Maximum links/images checked after page discovery. Input URLs do not count toward this.</small>
-                </span>
-                <input id="maxDiscoveredAssetsInput" type="text" inputmode="numeric" value="10,000">
-              </label>
-              <label class="number-field">
-                <span class="field-copy">
-                  <strong>Asset concurrency</strong>
-                  <small>How many discovered links/images are checked at once.</small>
-                </span>
-                <input id="linkConcurrencyInput" type="text" inputmode="numeric" value="4">
-              </label>
-              <label class="number-field">
-                <span class="field-copy">
-                  <strong id="linkDelayLabel">Delay per asset sec</strong>
-                  <small id="linkDelayHelp">Pause before checking each discovered link/image. Supports up to 10 seconds.</small>
-                </span>
-                <input id="linkDelayInput" type="text" inputmode="decimal" value="0.25">
-              </label>
+              <div class="settings-col">
+              <div class="settings-group">
+                <div class="settings-subheading">Mode &amp; concurrency</div>
+                <label class="check-row">
+                  <input id="extractionModeInput" type="checkbox">
+                  <span class="check-mark" aria-hidden="true"></span>
+                  <span class="check-copy">
+                    <strong>Render JavaScript</strong>
+                    <small>Load each page's JavaScript to find the links and images a browser would see. Off uses fast static HTML only — no JavaScript, fewer discovered assets.</small>
+                  </span>
+                </label>
+                <label class="number-field">
+                  <span class="field-copy">
+                    <strong>Page concurrency</strong>
+                    <small>Static HTML pages checked at once.</small>
+                  </span>
+                  <input id="pageConcurrencyInput" type="text" inputmode="numeric" value="4">
+                </label>
+                <label class="number-field rendered-setting">
+                  <span class="field-copy">
+                    <strong>Rendered concurrency</strong>
+                    <small>Rendered tabs loaded at once. Lower is gentler.</small>
+                  </span>
+                  <input id="renderedConcurrencyInput" type="text" inputmode="numeric" value="1">
+                </label>
+              </div>
+              <div class="settings-group rendered-setting">
+                <div class="settings-subheading">Rendered behavior</div>
+                <label class="number-field">
+                  <span class="field-copy">
+                    <strong id="renderWaitLabel">Render wait max sec</strong>
+                    <small id="renderWaitHelp">Maximum seconds after page load while waiting for rendered DOM stability. Supports up to 120 seconds.</small>
+                  </span>
+                  <input id="renderWaitInput" type="text" inputmode="decimal" value="3">
+                </label>
+                <label class="check-row">
+                  <input id="openInactiveInput" type="checkbox" checked>
+                  <span class="check-mark" aria-hidden="true"></span>
+                  <span class="check-copy">
+                    <strong>Open tabs inactive</strong>
+                    <small>Rendered tabs do not steal focus.</small>
+                  </span>
+                </label>
+                <label class="check-row">
+                  <input id="useBrowserSessionInput" type="checkbox" checked>
+                  <span class="check-mark" aria-hidden="true"></span>
+                  <span class="check-copy">
+                    <strong>Use browser session</strong>
+                    <small>Use Chrome login cookies for rendered page, link, and image checks.</small>
+                  </span>
+                </label>
+                <label class="check-row">
+                  <input id="useDedicatedRenderWindowInput" type="checkbox">
+                  <span class="check-mark" aria-hidden="true"></span>
+                  <span class="check-copy">
+                    <strong>Use dedicated render window</strong>
+                    <small>Optional: keeps rendered crawl tabs in a separate Chrome window.</small>
+                  </span>
+                </label>
+                <label class="check-row">
+                  <input id="closeRenderedTabsInput" type="checkbox" checked>
+                  <span class="check-mark" aria-hidden="true"></span>
+                  <span class="check-copy">
+                    <strong>Close rendered tabs</strong>
+                    <small>Automatically close tabs after collection.</small>
+                  </span>
+                </label>
+              </div>
+              </div>
+              <div class="settings-col">
+              <div class="settings-group">
+                <div class="settings-subheading">Timing &amp; limits</div>
+                <label class="check-row">
+                  <input id="keepAwakeInput" type="checkbox" checked>
+                  <span class="check-mark" aria-hidden="true"></span>
+                  <span class="check-copy">
+                    <strong>Keep device awake</strong>
+                    <small>Prevent the computer from sleeping while a crawl runs, so long unattended runs can finish.</small>
+                  </span>
+                </label>
+                <label class="number-field">
+                  <span class="field-copy">
+                    <strong id="timeoutLabel">Timeout sec</strong>
+                    <small id="timeoutHelp">Applies to page, link, and image requests. Supports 1-300 seconds.</small>
+                  </span>
+                  <input id="timeoutInput" type="text" inputmode="decimal" value="10">
+                </label>
+                <label class="number-field">
+                  <span class="field-copy">
+                    <strong id="linkDelayLabel">Delay per asset sec</strong>
+                    <small id="linkDelayHelp">Pause before checking each discovered link/image. Supports up to 10 seconds.</small>
+                  </span>
+                  <input id="linkDelayInput" type="text" inputmode="decimal" value="0.25">
+                </label>
+                <label class="number-field">
+                  <span class="field-copy">
+                    <strong>Asset concurrency</strong>
+                    <small>How many discovered links/images are checked at once.</small>
+                  </span>
+                  <input id="linkConcurrencyInput" type="text" inputmode="numeric" value="4">
+                </label>
+                <label class="number-field">
+                  <span class="field-copy">
+                    <strong>Input URL limit</strong>
+                    <small>Maximum input page URLs checked from paste, upload, sitemap, or llms.txt sources.</small>
+                  </span>
+                  <input id="maxInputUrlsInput" type="text" inputmode="numeric" value="10,000">
+                </label>
+                <label class="number-field">
+                  <span class="field-copy">
+                    <strong>Discovered asset limit</strong>
+                    <small>Maximum links/images checked after page discovery. Input URLs do not count toward this.</small>
+                  </span>
+                  <input id="maxDiscoveredAssetsInput" type="text" inputmode="numeric" value="10,000">
+                </label>
+              </div>
+              </div>
             </div>
           </section>
-          <section class="settings-section" aria-labelledby="tableSettingsHeading">
+          <section class="settings-section" data-settings-tab="results" aria-labelledby="tableSettingsHeading" hidden>
             <div class="settings-section-header">
               <h3 id="tableSettingsHeading">Configure results table</h3>
             </div>
             <div class="settings-list compact-settings-list table-config-list">
-              <div class="table-config-group">
-                <div class="settings-subheading">Row filters</div>
-                <label class="check-row">
-                  <input id="hideSkippedToggle" type="checkbox">
-                  <span class="check-mark" aria-hidden="true"></span>
-                  <span class="check-copy"><strong>Hide skipped rows</strong></span>
-                </label>
-                <label class="check-row">
-                  <input id="hideImagesToggle" type="checkbox">
-                  <span class="check-mark" aria-hidden="true"></span>
-                  <span class="check-copy"><strong>Hide images</strong></span>
-                </label>
-                <label class="check-row">
-                  <input id="hideLinksToggle" type="checkbox">
-                  <span class="check-mark" aria-hidden="true"></span>
-                  <span class="check-copy"><strong>Hide links</strong></span>
-                </label>
+              <div class="settings-col">
+                <div class="table-config-group">
+                  <div class="settings-subheading">Table display</div>
+                  <label class="check-row">
+                    <input id="resultsDensityInput" type="checkbox">
+                    <span class="check-mark" aria-hidden="true"></span>
+                    <span class="check-copy"><strong>Dense rows</strong></span>
+                  </label>
+                </div>
+                <div class="table-config-group">
+                  <div class="settings-subheading">Row filters</div>
+                  <label class="check-row">
+                    <input id="hideSkippedToggle" type="checkbox">
+                    <span class="check-mark" aria-hidden="true"></span>
+                    <span class="check-copy"><strong>Hide skipped rows</strong></span>
+                  </label>
+                  <label class="check-row">
+                    <input id="hideImagesToggle" type="checkbox">
+                    <span class="check-mark" aria-hidden="true"></span>
+                    <span class="check-copy"><strong>Hide images</strong></span>
+                  </label>
+                  <label class="check-row">
+                    <input id="hideLinksToggle" type="checkbox">
+                    <span class="check-mark" aria-hidden="true"></span>
+                    <span class="check-copy"><strong>Hide links</strong></span>
+                  </label>
+                </div>
+                <div class="table-config-group">
+                  <div class="settings-subheading">Status and timing</div>
+                  <label class="check-row">
+                    <input class="column-toggle" type="checkbox" data-column-toggle="time" checked>
+                    <span class="check-mark" aria-hidden="true"></span>
+                    <span class="check-copy"><strong>Time</strong></span>
+                  </label>
+                  <label class="check-row">
+                    <input class="column-toggle" type="checkbox" data-column-toggle="linkIssues" checked>
+                    <span class="check-mark" aria-hidden="true"></span>
+                    <span class="check-copy"><strong>Non-200 links</strong></span>
+                  </label>
+                  <label class="check-row">
+                    <input class="column-toggle" type="checkbox" data-column-toggle="imageIssues" checked>
+                    <span class="check-mark" aria-hidden="true"></span>
+                    <span class="check-copy"><strong>Non-200 images</strong></span>
+                  </label>
+                  <label class="check-row">
+                    <input class="column-toggle" type="checkbox" data-column-toggle="result" checked>
+                    <span class="check-mark" aria-hidden="true"></span>
+                    <span class="check-copy"><strong>Result</strong></span>
+                  </label>
+                </div>
               </div>
-              <div class="table-config-group">
-                <div class="settings-subheading">Source details</div>
-                <label class="check-row">
-                  <input class="column-toggle" type="checkbox" data-column-toggle="sourcePage" checked>
-                  <span class="check-mark" aria-hidden="true"></span>
-                  <span class="check-copy"><strong>Source page</strong></span>
-                </label>
-                <label class="check-row">
-                  <input class="column-toggle" type="checkbox" data-column-toggle="area" checked>
-                  <span class="check-mark" aria-hidden="true"></span>
-                  <span class="check-copy"><strong>Area</strong></span>
-                </label>
-                <label class="check-row">
-                  <input class="column-toggle" type="checkbox" data-column-toggle="textAlt" checked>
-                  <span class="check-mark" aria-hidden="true"></span>
-                  <span class="check-copy"><strong>Text / alt</strong></span>
-                </label>
-              </div>
-              <div class="table-config-group">
-                <div class="settings-subheading">Status and timing</div>
-                <label class="check-row">
-                  <input class="column-toggle" type="checkbox" data-column-toggle="time" checked>
-                  <span class="check-mark" aria-hidden="true"></span>
-                  <span class="check-copy"><strong>Time</strong></span>
-                </label>
-                <label class="check-row">
-                  <input class="column-toggle" type="checkbox" data-column-toggle="linkIssues" checked>
-                  <span class="check-mark" aria-hidden="true"></span>
-                  <span class="check-copy"><strong>Non-200 links</strong></span>
-                </label>
-                <label class="check-row">
-                  <input class="column-toggle" type="checkbox" data-column-toggle="imageIssues" checked>
-                  <span class="check-mark" aria-hidden="true"></span>
-                  <span class="check-copy"><strong>Non-200 images</strong></span>
-                </label>
-                <label class="check-row">
-                  <input class="column-toggle" type="checkbox" data-column-toggle="result" checked>
-                  <span class="check-mark" aria-hidden="true"></span>
-                  <span class="check-copy"><strong>Result</strong></span>
-                </label>
-              </div>
-              <div class="table-config-group">
-                <div class="settings-subheading">Page metadata</div>
-                <label class="check-row">
-                  <input class="column-toggle" type="checkbox" data-column-toggle="title" checked>
-                  <span class="check-mark" aria-hidden="true"></span>
-                  <span class="check-copy"><strong>Title</strong></span>
-                </label>
-                <label class="check-row">
-                  <input class="column-toggle" type="checkbox" data-column-toggle="description" checked>
-                  <span class="check-mark" aria-hidden="true"></span>
-                  <span class="check-copy"><strong>Description</strong></span>
-                </label>
-                <label class="check-row">
-                  <input class="column-toggle" type="checkbox" data-column-toggle="h1" checked>
-                  <span class="check-mark" aria-hidden="true"></span>
-                  <span class="check-copy"><strong>H1</strong></span>
-                </label>
-                <label class="check-row">
-                  <input class="column-toggle" type="checkbox" data-column-toggle="robots" checked>
-                  <span class="check-mark" aria-hidden="true"></span>
-                  <span class="check-copy"><strong>Meta Robots</strong></span>
-                </label>
-                <label class="check-row">
-                  <input class="column-toggle" type="checkbox" data-column-toggle="canonical" checked>
-                  <span class="check-mark" aria-hidden="true"></span>
-                  <span class="check-copy"><strong>Canonical</strong></span>
-                </label>
-                <label class="check-row">
-                  <input class="column-toggle" type="checkbox" data-column-toggle="words" checked>
-                  <span class="check-mark" aria-hidden="true"></span>
-                  <span class="check-copy"><strong>Words</strong></span>
-                </label>
+              <div class="settings-col">
+                <div class="table-config-group">
+                  <div class="settings-subheading">Source details</div>
+                  <label class="check-row">
+                    <input class="column-toggle" type="checkbox" data-column-toggle="sourcePage" checked>
+                    <span class="check-mark" aria-hidden="true"></span>
+                    <span class="check-copy"><strong>Source page</strong></span>
+                  </label>
+                  <label class="check-row">
+                    <input class="column-toggle" type="checkbox" data-column-toggle="area" checked>
+                    <span class="check-mark" aria-hidden="true"></span>
+                    <span class="check-copy"><strong>Area</strong></span>
+                  </label>
+                  <label class="check-row">
+                    <input class="column-toggle" type="checkbox" data-column-toggle="textAlt" checked>
+                    <span class="check-mark" aria-hidden="true"></span>
+                    <span class="check-copy"><strong>Text / alt</strong></span>
+                  </label>
+                </div>
+                <div class="table-config-group">
+                  <div class="settings-subheading">Page metadata</div>
+                  <label class="check-row">
+                    <input class="column-toggle" type="checkbox" data-column-toggle="title" checked>
+                    <span class="check-mark" aria-hidden="true"></span>
+                    <span class="check-copy"><strong>Title</strong></span>
+                  </label>
+                  <label class="check-row">
+                    <input class="column-toggle" type="checkbox" data-column-toggle="description" checked>
+                    <span class="check-mark" aria-hidden="true"></span>
+                    <span class="check-copy"><strong>Description</strong></span>
+                  </label>
+                  <label class="check-row">
+                    <input class="column-toggle" type="checkbox" data-column-toggle="h1" checked>
+                    <span class="check-mark" aria-hidden="true"></span>
+                    <span class="check-copy"><strong>H1</strong></span>
+                  </label>
+                  <label class="check-row">
+                    <input class="column-toggle" type="checkbox" data-column-toggle="robots" checked>
+                    <span class="check-mark" aria-hidden="true"></span>
+                    <span class="check-copy"><strong>Meta Robots</strong></span>
+                  </label>
+                  <label class="check-row">
+                    <input class="column-toggle" type="checkbox" data-column-toggle="canonical" checked>
+                    <span class="check-mark" aria-hidden="true"></span>
+                    <span class="check-copy"><strong>Canonical</strong></span>
+                  </label>
+                  <label class="check-row">
+                    <input class="column-toggle" type="checkbox" data-column-toggle="words" checked>
+                    <span class="check-mark" aria-hidden="true"></span>
+                    <span class="check-copy"><strong>Words</strong></span>
+                  </label>
+                </div>
               </div>
             </div>
           </section>
         </div>
-        <section class="settings-section about-section" aria-labelledby="aboutHeading">
-          <div class="settings-section-header">
-            <h3 id="aboutHeading">About</h3>
-          </div>
-          <div class="about-content">
-            <p class="about-version">BulkStatus <span id="aboutVersion">—</span></p>
-            <div class="about-whatsnew">
-              <strong class="about-whatsnew-title">What's new</strong>
-              <ul class="about-whatsnew-list" id="aboutWhatsNewList"></ul>
-            </div>
-            <button class="link-button about-changelog-link" id="openChangelogButton" type="button" hidden>View full changelog</button>
-          </div>
-        </section>
         <div class="settings-actions">
-          <span class="version-label" id="versionLabel">Version</span>
           <button class="secondary-button" id="resetSettingsButton" type="button">Reset defaults</button>
         </div>
       </section>
@@ -455,29 +508,19 @@
             <div>
               <div class="input-heading-copy">
                 <h2 id="inputHeading">Inputs & Quick Configuration</h2>
-                <p id="inputLimitCopy">Choose an input source, adjust configuration settings if necessary, then provide the URLs you'd like to retrieve information for.</p>
-                <span class="input-format-label">Input format</span>
-                <div class="input-mode-tabs" role="tablist" aria-label="Input source">
-                  <button class="input-mode-tab" type="button" data-input-mode="list" role="tab" aria-selected="true">URL list</button>
-                  <button class="input-mode-tab" type="button" data-input-mode="sitemap" role="tab" aria-selected="false">XML sitemap</button>
-                  <button class="input-mode-tab" type="button" data-input-mode="llms" role="tab" aria-selected="false">llms.txt</button>
-                </div>
+                <p id="inputLimitCopy">Pick a source, set what to check on the right, then add your URLs.</p>
               </div>
               <div class="current-settings" aria-label="Current check settings">
                 <div class="current-settings-row">
-                  <span class="current-settings-label">Quick Configuration</span>
-                  <div class="quick-config-column">
-                    <button class="setting-chip" id="modeChip" type="button" title="Toggle JavaScript rendering">JavaScript rendering</button>
-                    <button class="setting-chip" id="imagesChip" type="button" title="Toggle image checking">Check images</button>
-                    <button class="setting-chip" id="linksChip" type="button" title="Toggle link checking">Check links</button>
-                  </div>
-                  <div class="quick-config-column">
-                    <button class="setting-chip" id="navChip" type="button" title="Toggle nav link checking">Check nav links</button>
-                    <button class="setting-chip" id="footerChip" type="button" title="Toggle footer link checking">Check footer links</button>
-                    <button class="settings-link-button" id="openSettingsInlineButton" type="button" title="Configure further settings" aria-label="Configure further settings">
+                  <div class="quick-config-heading">
+                    <button class="quick-config-gear" id="openSettingsInlineButton" type="button" title="Open settings" aria-label="Open settings">
                       <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.09a2 2 0 0 1-1-1.74v-.51a2 2 0 0 1 1-1.72l.15-.1a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
-                      <span>Configure further</span>
                     </button>
+                    <span class="current-settings-label">Quick Configuration</span>
+                  </div>
+                  <div class="quick-config-chips">
+                    <button class="setting-chip" id="linksChip" type="button" title="Toggle link checking"><span class="qc-box" aria-hidden="true"></span>Check links</button>
+                    <button class="setting-chip" id="imagesChip" type="button" title="Toggle image checking"><span class="qc-box" aria-hidden="true"></span>Check images</button>
                   </div>
                 </div>
               </div>
@@ -485,12 +528,15 @@
           </div>
         </div>
         <div class="panel-body input-body" id="urlsPanelBody">
+          <div class="source-card">
+          <div class="input-mode-tabs" role="tablist" aria-label="Input format">
+            <button class="input-mode-tab" type="button" data-input-mode="list" role="tab" aria-selected="true">URL list</button>
+            <button class="input-mode-tab" type="button" data-input-mode="sitemap" role="tab" aria-selected="false">XML sitemap</button>
+            <button class="input-mode-tab" type="button" data-input-mode="llms" role="tab" aria-selected="false">llms.txt</button>
+          </div>
+          <div class="source-zone">
           <div class="source-input-panel" id="sourceInputPanel" hidden>
             <label class="source-url-field">
-              <span class="field-copy">
-                <strong id="sourceInputLabel">Source URL</strong>
-                <small id="sourceInputHelp">Enter a source URL and fetch URLs before running a check.</small>
-              </span>
               <input id="sourceUrlInput" type="text" spellcheck="false" placeholder="https://example.com/sitemap.xml">
             </label>
             <div class="source-actions">
@@ -507,8 +553,13 @@
               </div>
               <p class="source-status" id="sourceStatus" hidden></p>
             </div>
+            <small id="sourceInputHelp" class="source-help">Enter a source URL and fetch URLs before running a check.</small>
           </div>
-          <textarea id="urlInput" spellcheck="false" placeholder="https://example.com&#10;example.com/pricing&#10;https://example.com/blog"></textarea>
+          <div class="textarea-resize" id="urlInputResize">
+            <textarea id="urlInput" spellcheck="false" placeholder="https://example.com&#10;example.com/pricing&#10;https://example.com/blog"></textarea>
+          </div>
+          </div>
+          </div>
           <div class="input-actions">
             <div class="run-actions run-actions-left">
               <button class="secondary-button" id="clearButton" type="button">Clear</button>
@@ -522,19 +573,45 @@
               <button class="primary-button" id="runButton" type="button">Run check</button>
             </div>
           </div>
-          <div class="progress-wrap" id="progressWrap" aria-label="Progress" hidden>
-            <div class="progress-estimate" id="progressEstimate"></div>
-            <div class="progress-track">
-              <div class="progress-bar" id="progressBar"></div>
+          <div class="progress-wrap is-idle" id="progressWrap" aria-label="Progress">
+            <div class="progress-head">
+              <span class="progress-step" id="progressStep"></span>
+              <div class="progress-head-right">
+                <span class="progress-summary">
+                  <span class="psum-count"><span id="progressBig"></span> <span class="psum-unit" id="progressBigLabel"></span></span>
+                  <span class="psum-sep" aria-hidden="true">&middot;</span>
+                  <span class="psum-dim" id="progressQueued"></span>
+                  <span class="psum-sep" aria-hidden="true">&middot;</span>
+                  <span class="psum-dim" id="progressEta"></span>
+                </span>
+                <div class="progress-controls" id="progressControls" hidden>
+                  <button class="icon-button progress-button" id="pauseRunButton" type="button" title="Pause crawl" aria-label="Pause crawl">
+                    <svg data-pause-icon aria-hidden="true" viewBox="0 0 24 24"><path d="M10 5v14"/><path d="M14 5v14"/></svg>
+                    <svg data-play-icon aria-hidden="true" viewBox="0 0 24 24" hidden><path d="m8 5 12 7-12 7V5z"/></svg>
+                  </button>
+                  <button class="icon-button progress-button" id="stopRunButton" type="button" title="Stop crawl" aria-label="Stop crawl">
+                    <svg aria-hidden="true" viewBox="0 0 24 24"><rect x="7" y="7" width="10" height="10" rx="1"/></svg>
+                  </button>
+                </div>
+              </div>
             </div>
-            <div class="progress-controls" id="progressControls" hidden>
-              <button class="icon-button progress-button" id="pauseRunButton" type="button" title="Pause crawl" aria-label="Pause crawl">
-                <svg data-pause-icon aria-hidden="true" viewBox="0 0 24 24"><path d="M10 5v14"/><path d="M14 5v14"/></svg>
-                <svg data-play-icon aria-hidden="true" viewBox="0 0 24 24" hidden><path d="m8 5 12 7-12 7V5z"/></svg>
-              </button>
-              <button class="icon-button progress-button" id="stopRunButton" type="button" title="Stop crawl" aria-label="Stop crawl">
-                <svg aria-hidden="true" viewBox="0 0 24 24"><rect x="7" y="7" width="10" height="10" rx="1"/></svg>
-              </button>
+            <div class="progress-bars" id="progressBars">
+              <div class="seg" id="pagesRow">
+                <div class="seg-lab"><span class="pdot page"></span>Pages<span class="seg-count" id="pagesCount"></span></div>
+                <div class="ptrack"><div class="pfill page" id="pagesFill"></div></div>
+              </div>
+              <div class="seg" id="linksRow">
+                <div class="seg-lab"><span class="pdot link"></span>Links<span class="seg-count" id="linksCount"></span></div>
+                <div class="ptrack"><div class="pfill link" id="linksFill"></div></div>
+              </div>
+              <div class="seg" id="imagesRow">
+                <div class="seg-lab"><span class="pdot image"></span>Images<span class="seg-count" id="imagesCount"></span></div>
+                <div class="ptrack"><div class="pfill image" id="imagesFill"></div></div>
+              </div>
+              <div class="seg seg-generic" id="genericRow" hidden>
+                <div class="seg-lab"><span class="pdot generic"></span><span id="genericLabel">Retrying</span><span class="seg-count" id="genericCount"></span></div>
+                <div class="ptrack"><div class="pfill generic" id="genericFill"></div></div>
+              </div>
             </div>
           </div>
         </div>
@@ -552,14 +629,22 @@
             </div>
           </div>
           <div class="toolbar">
-            <button class="secondary-button action-button" id="copySummaryButton" type="button" disabled>
-              <svg aria-hidden="true" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-              <span>Copy Summary</span>
-            </button>
-            <button class="secondary-button action-button" id="exportSummaryButton" type="button" disabled>
-              <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/></svg>
-              <span>Export Summary</span>
-            </button>
+            <div class="toolbar-group">
+              <button class="secondary-button action-button" id="copyAiSummaryButton" type="button" title="Copy a prompt with the crawl summary to paste into an AI assistant" disabled>
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3v4"/><path d="M12 17v4"/><path d="M3 12h4"/><path d="M17 12h4"/><circle cx="12" cy="12" r="3.5"/></svg>
+                <span>Copy for AI</span>
+              </button>
+            </div>
+            <div class="toolbar-group toolbar-group-separated">
+              <button class="secondary-button action-button" id="copySummaryButton" type="button" disabled>
+                <svg aria-hidden="true" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                <span>Copy Summary</span>
+              </button>
+              <button class="secondary-button action-button" id="exportSummaryButton" type="button" disabled>
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/></svg>
+                <span>Export Summary</span>
+              </button>
+            </div>
           </div>
         </div>
         <div class="panel-body summary-body" id="summaryPanelBody">
@@ -568,7 +653,7 @@
         </div>
       </section>
 
-      <section class="results-band" aria-labelledby="resultsHeading">
+      <section class="results-band" id="resultsBand" aria-labelledby="resultsHeading">
         <div class="panel-header results-header">
           <div class="panel-title">
             <button class="panel-toggle" type="button" data-panel-toggle="results" aria-expanded="true" aria-label="Collapse Results">
@@ -602,6 +687,12 @@
               <button class="secondary-button action-button" id="exportButton" type="button" disabled>
                 <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/></svg>
                 <span>Export CSV</span>
+              </button>
+            </div>
+            <div class="toolbar-group toolbar-group-separated" aria-label="Results view">
+              <button class="icon-button results-expand-button" id="resultsFullscreenButton" type="button" title="Expand results to full screen" aria-label="Expand results to full screen">
+                <svg data-expand-icon aria-hidden="true" viewBox="0 0 24 24"><path d="M15 3h6v6"/><path d="M9 21H3v-6"/><path d="M21 3l-7 7"/><path d="M3 21l7-7"/></svg>
+                <svg data-collapse-icon aria-hidden="true" viewBox="0 0 24 24"><path d="M4 14h6v6"/><path d="M20 10h-6V4"/><path d="M14 10l7-7"/><path d="M3 21l7-7"/></svg>
               </button>
             </div>
           </div>
@@ -683,8 +774,8 @@
             <button class="secondary-button pagination-show-all" type="button" data-page-action="show-all">Show all</button>
           </div>
         </div>
+        <div class="table-resize">
         <div class="table-shell" id="tableShell">
-          <div class="empty-state" id="emptyState">Run a check to see results here.</div>
           <table>
             <thead>
               <tr>
@@ -714,6 +805,7 @@
             <tbody id="resultsBody"></tbody>
           </table>
         </div>
+        </div>
         <div class="pagination-controls pagination-controls-bottom" data-pagination-controls hidden aria-label="Results pagination">
           <div class="pagination-nav">
             <button class="icon-button pagination-button" type="button" data-page-action="previous" title="Previous results page" aria-label="Previous results page">
@@ -737,33 +829,28 @@
         </div>
         </div>
       </section>
-
-      <section class="diagnostics-band" id="diagnosticsPanel" aria-labelledby="diagnosticsHeading">
-        <div class="panel-header diagnostics-header">
-          <div class="panel-title">
-            <button class="panel-toggle" type="button" data-panel-toggle="diagnostics" aria-expanded="false" aria-label="Expand Diagnostics">
-              <svg aria-hidden="true" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
-            </button>
-            <div>
-              <h2 id="diagnosticsHeading">Diagnostics</h2>
-              <p id="diagnosticsSummary">Run a check to populate diagnostics.</p>
-            </div>
-          </div>
-          <div class="toolbar">
-            <button class="secondary-button action-button" id="copyDiagnosticsButton" type="button" disabled>
-              <svg aria-hidden="true" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-              <span>Copy Diagnostics</span>
-            </button>
-            <button class="secondary-button action-button" id="downloadDiagnosticsButton" type="button" disabled>
-              <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/></svg>
-              <span>Download JSON</span>
-            </button>
-          </div>
+      <footer class="app-footer">
+        <div class="app-footer-links">
+          <button class="footer-link" id="footerVersionButton" type="button" title="View changelog">BulkStatus</button>
+          <span class="footer-sep" aria-hidden="true">&middot;</span>
+          <button class="footer-link" id="footerGithubButton" type="button">GitHub</button>
+          <span class="footer-sep" aria-hidden="true">&middot;</span>
+          <button class="footer-link" id="footerIssueButton" type="button">Report an issue</button>
+          <span class="footer-sep" aria-hidden="true">&middot;</span>
+          <button class="footer-link" id="footerPrivacyButton" type="button">Privacy</button>
         </div>
-        <div class="panel-body diagnostics-body" id="diagnosticsBody" hidden>
-          <ol id="diagnosticsList"></ol>
+        <div class="app-footer-end">
+          <span class="footer-credit">&copy; 2026 RJS Solutions</span>
+          <button class="footer-link footer-top-link" id="footerBackToTop" type="button">
+            Back to top
+            <svg aria-hidden="true" viewBox="0 0 24 24"><path d="m18 15-6-6-6 6"/></svg>
+          </button>
         </div>
-      </section>
+      </footer>
+      <div class="app-toast" id="appToast" role="status" aria-live="polite" hidden></div>
+      <button class="floating-top" id="floatingBackToTop" type="button" title="Back to top" aria-label="Back to top" hidden>
+        <svg aria-hidden="true" viewBox="0 0 24 24"><path d="m18 15-6-6-6 6"/></svg>
+      </button>
     </main>
     <script type="module" src="app.js"></script>
   </body>
