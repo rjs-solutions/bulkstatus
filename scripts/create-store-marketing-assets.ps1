@@ -224,32 +224,13 @@ function New-MarketingScreenshot {
   $graphics.FillRectangle($background, 0, 0, 1280, 800)
   Fill-RoundedRect $graphics 42 30 1196 738 30 $cardBrush $cardPen
 
-  $graphics.DrawImage($icon, (New-Rect 86 63 40 40))
-  Draw-Text $graphics "BulkStatus" $brandFont $headlineBrush 146 65 340 28
-  Draw-Text $graphics "Bulk URL Checker" $brandSubFont $bodyBrush 146 94 340 24
-  Draw-Text $graphics $Headline $headlineFont $headlineBrush 88 137 900 48
-  Draw-Text $graphics $Body $bodyFont $bodyBrush 88 192 1030 58
-  Draw-Chips $graphics $Chips 84 252 $chipFont $blueBrush
-  Draw-AppPreview $graphics $raw 78 303 1124 426 $CropY
-
-  if ($OutputFile -eq "04-settings-marketing-1280x800.png") {
-    $selectBrush = [System.Drawing.SolidBrush]::new([System.Drawing.Color]::White)
-    $selectPen = [System.Drawing.Pen]::new([System.Drawing.Color]::FromArgb(255, 203, 213, 225), 1)
-    $textBrush = [System.Drawing.SolidBrush]::new([System.Drawing.Color]::FromArgb(255, 15, 23, 42))
-    $selectFont = [System.Drawing.Font]::new("Segoe UI", 10, [System.Drawing.FontStyle]::Regular, [System.Drawing.GraphicsUnit]::Pixel)
-    $chevronPen = [System.Drawing.Pen]::new([System.Drawing.Color]::FromArgb(255, 71, 85, 105), 1.2)
-    $chevronPen.StartCap = [System.Drawing.Drawing2D.LineCap]::Round
-    $chevronPen.EndCap = [System.Drawing.Drawing2D.LineCap]::Round
-    Fill-RoundedRect $graphics 1008 672 128 26 6 $selectBrush $selectPen
-    Draw-Text $graphics "Hidden" $selectFont $textBrush 1022 679 70 16
-    $graphics.DrawLine($chevronPen, 1122, 683, 1126, 687)
-    $graphics.DrawLine($chevronPen, 1126, 687, 1130, 683)
-    $selectBrush.Dispose()
-    $selectPen.Dispose()
-    $textBrush.Dispose()
-    $selectFont.Dispose()
-    $chevronPen.Dispose()
-  }
+  # Brand block intentionally omitted: the app's own header (visible in every capture)
+  # and the store listing already carry the BulkStatus name + icon, so repeating it here
+  # just wastes space. Headline/body/chips moved up and the preview window enlarged.
+  Draw-Text $graphics $Headline $headlineFont $headlineBrush 88 64 1100 48
+  Draw-Text $graphics $Body $bodyFont $bodyBrush 88 120 1100 58
+  Draw-Chips $graphics $Chips 84 182 $chipFont $blueBrush
+  Draw-AppPreview $graphics $raw 78 228 1124 512 $CropY
 
   Save-Png $bitmap $outputPath
 
@@ -366,7 +347,6 @@ $screenshots = @(
     Headline = "Review every result in a sortable table"
     Body = "Filter, sort, page through results, and export CSV files for reporting or follow-up."
     Chips = @("Filters", "Pagination", "CSV export")
-    CropY = 520
   },
   @{
     Raw = "04-settings-raw.png"
@@ -395,5 +375,5 @@ foreach ($shot in $screenshots) {
   New-PlainScreenshot -RawFile $shot.Raw -OutputFile $shot.Plain
 }
 
-New-PromoTile -OutputFile "small-promo-tile-440x280.png" -Width 440 -Height 280 -Headline "Bulk URL Checker" -Body "Check links, redirects, status & SEO metadata in bulk - export to CSV."
-New-PromoTile -OutputFile "marquee-promo-tile-1400x560.png" -Width 1400 -Height 560 -Headline "Bulk URL health checks, built for web teams" -Body "Run focused crawls, review summary metrics, sort/filter results, and export CSV findings directly from Chrome."
+New-PromoTile -OutputFile "small-promo-tile-440x280.png" -Width 440 -Height 280 -Headline "Bulk URL Checker & Crawler" -Body "Crawl & bulk-check status, links, images & SEO metadata - export to CSV."
+New-PromoTile -OutputFile "marquee-promo-tile-1400x560.png" -Width 1400 -Height 560 -Headline "Crawl & bulk-check URLs for broken links, redirects & SEO" -Body "Run focused crawls, review summary metrics, sort and filter results, and export CSV - all from Chrome."

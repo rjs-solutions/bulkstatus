@@ -2,6 +2,8 @@
 
 Crawl and bulk-check URLs for status codes, broken links, redirects, images, and SEO metadata — built for web teams, without leaving Chrome.
 
+![BulkStatus — review every result in a sortable, filterable table with status codes, redirects, and issues](docs/images/results.png)
+
 BulkStatus turns a list of URLs into an audit. Paste them, upload a TXT/CSV, or point it at
 an XML sitemap or `llms.txt` file, then run a check to see HTTP status, final redirected
 URL, response time, and on-page metadata for every page — plus optional checks on the links
@@ -11,6 +13,8 @@ runs in your browser; nothing is sent to a server.
 - **Chrome Web Store:** https://chromewebstore.google.com/detail/bulkstatus-bulk-url-check/ngoefpeflkbebdpemiiebbjlkhmmkmeh
 - **Privacy policy:** [PRIVACY.md](PRIVACY.md)
 - **Changelog:** [CHANGELOG.md](CHANGELOG.md)
+
+![BulkStatus — summary metrics after a crawl: status groups, redirects, issues, and skipped rows](docs/images/summary.png)
 
 ## Why BulkStatus
 
