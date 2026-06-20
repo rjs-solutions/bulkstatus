@@ -2,8 +2,8 @@
   <title id="t">BulkStatus icon</title>
   <desc id="d">Two stacked pages with bold green-check and red-x status rows.</desc>
   <defs>
-    <linearGradient id="f2c2" x1="22" y1="14" x2="104" y2="112" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#e9eef4"/>
+    <linearGradient id="f2c2" x1="0" y1="0" x2="0.35" y2="1">
+      <stop offset="0" stop-color="#f4f8fc"/><stop offset="1" stop-color="#e7edf4"/>
     </linearGradient>
   </defs>
   <g transform="translate(64 64) scale(1.13) translate(-62 -68)">

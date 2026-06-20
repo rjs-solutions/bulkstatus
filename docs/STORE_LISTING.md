@@ -80,6 +80,10 @@ Lead with the payoff, end with configurability. Use the 1280x800 marketing varia
 4. Settings — configurable checks, speed, extraction mode, and columns
 5. Dark mode — same results view, showing polish and accessibility
 
+## Single Purpose
+
+BulkStatus has one purpose: to check a user-provided set of URLs — pasted, uploaded as a TXT/CSV, or fetched from an XML sitemap or llms.txt source — and report each URL's HTTP status, redirects, response time, on-page metadata, and (optionally) the status of the links and images it contains, in a sortable, filterable, exportable table.
+
 ## Privacy Summary
 
 BulkStatus runs checks locally in the browser after the user intentionally provides or fetches URLs and clicks Run Check.
@@ -93,6 +97,10 @@ For JavaScript-rendered checks, BulkStatus can use the user's existing Chrome br
 Optional site access is requested at runtime so BulkStatus can fetch user-provided URLs, fetched sitemap/llms.txt sources, and optionally discovered links/images to report HTTP status, redirects, metadata, and response timing. BulkStatus does not monitor browsing activity or run automatically on websites.
 
 ## Permission Justification Drafts
+
+### Power Permission (required)
+
+BulkStatus requests the `power` permission to optionally keep the device awake during a crawl (Settings -> "Keep device awake"). A large bulk check can outlast the system sleep timer; this keeps a long run from being interrupted when the machine would otherwise sleep. It is engaged only while a check is running and released as soon as the run finishes or is stopped, and it changes no other power or system settings.
 
 ### Optional Host Permissions
 
