@@ -668,10 +668,8 @@ function renderInputMode() {
 
   if (sourceMode) {
     elements.sourceUrlInput.value = state.sourceUrlByMode[state.inputMode] || "";
-    setSourceStatus(state.sourceStatusByMode[state.inputMode] || "", "");
   } else {
     elements.sourceUrlInput.value = "";
-    setSourceStatus("", "");
   }
 
   updateInputUrlCount();
@@ -1228,7 +1226,7 @@ async function runChecks() {
       state.completedWork += 1;
       state.progress.pages.done += 1;
       updateProgress(state.completedWork, state.totalWork);
-      renderResults();
+      scheduleResultsRender();
       maybePauseForAuthWall(result.row);
     }, { maxLimit: currentPageConcurrencyMax() });
 
@@ -1334,7 +1332,7 @@ async function retryErrorResults(options = {}) {
         discoveredAssetJobs.push(...result.assetJobs.map((job) => ({ ...job, groupId })));
         state.completedWork += 1;
         updateProgress(state.completedWork, state.totalWork);
-        renderResults();
+        scheduleResultsRender();
         maybePauseForAuthWall(result.row);
       }, { maxLimit: currentPageConcurrencyMax() });
     }
@@ -1354,14 +1352,15 @@ async function retryErrorResults(options = {}) {
         }
 
         const nextRow = assetRow(job, result, "");
-        const currentIndex = state.rows.indexOf(entry.row);
-        state.rows[currentIndex >= 0 ? currentIndex : entry.index] = nextRow;
+        // Asset retries only replace rows in place (no inserts/removals happen
+        // before this point), so the carried index stays valid — like the page phase.
+        state.rows[entry.index] = nextRow;
         if (!isErrorRow(nextRow)) {
           recovered += 1;
         }
         state.completedWork += 1;
         updateProgress(state.completedWork, state.totalWork);
-        renderResults();
+        scheduleResultsRender();
       }, { maxLimit: 16 });
     }
 
@@ -1506,7 +1505,7 @@ async function runAssetChecks(assetJobs) {
       state.progress.links.done += group.jobs.length;
     }
     updateProgress(state.completedWork, state.totalWork);
-    renderResults();
+    scheduleResultsRender();
   }, { maxLimit: 16 });
 
   if (state.stopRequested) {
@@ -1629,7 +1628,7 @@ function markPageRowChecking(index) {
     ...row,
     result: "Checking"
   };
-  renderResults();
+  scheduleResultsRender();
 }
 
 async function loadInputSource() {
@@ -1645,20 +1644,20 @@ async function loadInputSource() {
   try {
     sourceUrl = normalizeUrl(elements.sourceUrlInput.value);
   } catch (_error) {
-    setSourceStatus(`Enter a valid ${sourceName} URL.`, "error");
+    setSourceStatus(`Enter a valid ${sourceName} URL.`);
     return;
   }
 
   const hostAccessAllowed = await ensureHostPermission();
   if (!hostAccessAllowed) {
     const detail = hostPermissionError ? ` ${hostPermissionError}` : "";
-    setSourceStatus(`Site access permission is needed to fetch this source.${detail}`, "error");
+    setSourceStatus(`Site access permission is needed to fetch this source.${detail}`);
     return;
   }
 
   state.loadingInputSource = true;
   const loadingStartedAt = performance.now();
-  setSourceStatus("", "");
+  setSourceStatus("");
   setControls();
 
   try {
@@ -1678,10 +1677,10 @@ async function loadInputSource() {
     state.inputTextByMode[mode] = elements.urlInput.value;
     state.inputCountNoteByMode[mode] = loaded.note || "";
 
-    setSourceStatus("", "");
+    setSourceStatus("");
     updateInputUrlCount();
   } catch (error) {
-    setSourceStatus(error.message || String(error), "error");
+    setSourceStatus(error.message || String(error));
   } finally {
     const remainingSpinnerMs = MIN_FETCH_SPINNER_MS - (performance.now() - loadingStartedAt);
     if (remainingSpinnerMs > 0) {
@@ -1757,11 +1756,16 @@ async function fetchInputSourceText(sourceUrl, sourceName) {
   };
 }
 
+let lastSourceStatusMessage = "";
+
 function setSourceStatus(message) {
   const text = String(message || "").trim();
-  if (text) {
+  // Only surface a toast when the status actually changes, so repeated calls
+  // with the same message (or input-mode switches) don't re-pop the same toast.
+  if (text && text !== lastSourceStatusMessage) {
     showToast(text);
   }
+  lastSourceStatusMessage = text;
 }
 
 function updateInputUrlCount() {
@@ -2823,22 +2827,123 @@ function renderResultsPlaceholderRows(count) {
   return rows;
 }
 
-function renderResults() {
-  applyColumnVisibility();
-  updateSortHeaders();
-  renderFilterPanel();
-  if (!state.rows.length) {
-    elements.resultsBody.replaceChildren(...renderResultsPlaceholderRows(6));
-    renderPaginationControls();
-    updateSummary();
+let scheduledRenderHandle = 0;
+
+// During an active run, results render once per item. Coalesce those calls behind
+// a single animation frame so a burst of completed items produces at most one
+// render per frame. Direct renderResults() calls (completion/stop/pause and user
+// actions) supersede any pending frame via cancelScheduledRender().
+function scheduleResultsRender() {
+  if (scheduledRenderHandle) {
     return;
   }
 
-  const rows = visibleRows();
-  elements.resultsBody.replaceChildren(...rows.map((row) => renderRow(row)));
+  scheduledRenderHandle = requestAnimationFrame(() => {
+    scheduledRenderHandle = 0;
+    renderResults();
+  });
+}
+
+function cancelScheduledRender() {
+  if (scheduledRenderHandle) {
+    cancelAnimationFrame(scheduledRenderHandle);
+    scheduledRenderHandle = 0;
+  }
+}
+
+// Single pass over state.rows that tallies every count the filter panel and the
+// summary need, replacing ~30 separate full-array .filter() passes per render.
+// Reuses the existing row predicates so the totals stay identical.
+function computeRowCounts() {
+  const counts = {
+    total: state.rows.length,
+    family2xx: 0, family3xx: 0, family4xx: 0, family5xx: 0,
+    typePage: 0, typeLink: 0, typeImage: 0,
+    areaContent: 0, areaNav: 0, areaBreadcrumb: 0, areaFooter: 0, areaSidebar: 0, areaUnknown: 0,
+    issues: 0, redirects: 0, errors: 0, skipped: 0,
+    missingTitle: 0, missingDescription: 0, missingH1: 0, missingCanonical: 0,
+    canonicalizedPages: 0, noindexPages: 0, missingImageAlt: 0,
+    checked: 0, notFound: 0,
+    non200Links: 0, non200Images: 0, assetSkipped: 0
+  };
+
+  for (const row of state.rows) {
+    const family = statusFamily(row.statusCode);
+    if (family === "2xx") counts.family2xx += 1;
+    else if (family === "3xx") counts.family3xx += 1;
+    else if (family === "4xx") counts.family4xx += 1;
+    else if (family === "5xx") counts.family5xx += 1;
+
+    const isPage = row.rowType === "Page";
+    if (isPage) counts.typePage += 1;
+    else if (row.rowType === "Link") counts.typeLink += 1;
+    else if (row.rowType === "Image") counts.typeImage += 1;
+
+    const area = normalizedArea(row.linkLocation);
+    if (area === "content") counts.areaContent += 1;
+    else if (area === "nav") counts.areaNav += 1;
+    else if (area === "breadcrumb") counts.areaBreadcrumb += 1;
+    else if (area === "footer") counts.areaFooter += 1;
+    else if (area === "sidebar") counts.areaSidebar += 1;
+    else if (area === "unknown" && !isPage) counts.areaUnknown += 1;
+
+    const error = isErrorRow(row);
+    if (error || isNon200HttpStatus(row.statusCode)) counts.issues += 1;
+    if (error) counts.errors += 1;
+    if (Number(row.redirectCount || 0) > 0) counts.redirects += 1;
+    const skipped = isSkippedRow(row);
+    if (skipped) counts.skipped += 1;
+    if (isCheckedRow(row)) counts.checked += 1;
+    if (Number(row.statusCode) === 404) counts.notFound += 1;
+
+    if (isMissingTitleRow(row)) counts.missingTitle += 1;
+    if (isMissingDescriptionRow(row)) counts.missingDescription += 1;
+    if (isMissingH1Row(row)) counts.missingH1 += 1;
+    if (isMissingCanonicalRow(row)) counts.missingCanonical += 1;
+    if (isCanonicalizedPageRow(row)) counts.canonicalizedPages += 1;
+    if (isNoindexPageRow(row)) counts.noindexPages += 1;
+    if (isMissingImageAltRow(row)) counts.missingImageAlt += 1;
+
+    if (!isPage && skipped) counts.assetSkipped += 1;
+    if (row.rowType === "Link" && isNon200Status(row.statusCode, row.redirectCount)) counts.non200Links += 1;
+    if (row.rowType === "Image" && isNon200Status(row.statusCode, row.redirectCount)) counts.non200Images += 1;
+  }
+
+  return counts;
+}
+
+// Child (non-page) row count per page group, built once per render so expandCell
+// doesn't scan all of state.rows for every visible page row.
+function childCountByGroup() {
+  const counts = new Map();
+  for (const row of state.rows) {
+    if (row.rowType !== "Page") {
+      counts.set(row.groupId, (counts.get(row.groupId) || 0) + 1);
+    }
+  }
+  return counts;
+}
+
+function renderResults() {
+  cancelScheduledRender();
+  applyColumnVisibility();
+  updateSortHeaders();
+  const counts = computeRowCounts();
+  renderFilterPanel(counts);
+  if (!state.rows.length) {
+    elements.resultsBody.replaceChildren(...renderResultsPlaceholderRows(6));
+    renderPaginationControls(currentPagination());
+    updateSummary(counts);
+    return;
+  }
+
+  const pagination = currentPagination();
+  const childCounts = childCountByGroup();
+  const rows = visibleRows(pagination);
+  elements.resultsBody.replaceChildren(...rows.map((row) => renderRow(row, childCounts)));
   maybeResetResultsScroll();
-  renderPaginationControls();
-  updateSummary();
+  renderPaginationControls(pagination);
+  updateSummary(counts);
 }
 
 function toggleFilterPanel() {
@@ -2846,7 +2951,7 @@ function toggleFilterPanel() {
   renderFilterPanel();
 }
 
-function renderFilterPanel() {
+function renderFilterPanel(counts = computeRowCounts()) {
   elements.filterPanel.hidden = !state.filtersOpen;
   elements.filterButton.setAttribute("aria-expanded", String(state.filtersOpen));
   elements.filterButton.setAttribute("aria-pressed", String(hasActiveResultFilters()));
@@ -2865,35 +2970,35 @@ function renderFilterPanel() {
     input.checked = Boolean(state.filters[input.dataset.filterFlag]);
   });
 
-  updateFilterCounts();
+  updateFilterCounts(counts);
 }
 
-function updateFilterCounts() {
+function updateFilterCounts(rowCounts = computeRowCounts()) {
   const counts = {
-    "family-2xx": state.rows.filter((row) => statusFamily(row.statusCode) === "2xx").length,
-    "family-3xx": state.rows.filter((row) => statusFamily(row.statusCode) === "3xx").length,
-    "family-4xx": state.rows.filter((row) => statusFamily(row.statusCode) === "4xx").length,
-    "family-5xx": state.rows.filter((row) => statusFamily(row.statusCode) === "5xx").length,
-    "type-Page": state.rows.filter((row) => row.rowType === "Page").length,
-    "type-Link": state.rows.filter((row) => row.rowType === "Link").length,
-    "type-Image": state.rows.filter((row) => row.rowType === "Image").length,
-    "area-content": state.rows.filter((row) => normalizedArea(row.linkLocation) === "content").length,
-    "area-nav": state.rows.filter((row) => normalizedArea(row.linkLocation) === "nav").length,
-    "area-breadcrumb": state.rows.filter((row) => normalizedArea(row.linkLocation) === "breadcrumb").length,
-    "area-footer": state.rows.filter((row) => normalizedArea(row.linkLocation) === "footer").length,
-    "area-sidebar": state.rows.filter((row) => normalizedArea(row.linkLocation) === "sidebar").length,
-    "area-unknown": state.rows.filter((row) => row.rowType !== "Page" && normalizedArea(row.linkLocation) === "unknown").length,
-    "flag-issuesOnly": state.rows.filter((row) => isIssueRow(row)).length,
-    "flag-redirectsOnly": state.rows.filter((row) => Number(row.redirectCount || 0) > 0).length,
-    "flag-errorsOnly": state.rows.filter((row) => isErrorRow(row)).length,
-    "flag-skippedOnly": state.rows.filter((row) => isSkippedRow(row)).length,
-    "flag-missingTitle": state.rows.filter((row) => isMissingTitleRow(row)).length,
-    "flag-missingDescription": state.rows.filter((row) => isMissingDescriptionRow(row)).length,
-    "flag-missingH1": state.rows.filter((row) => isMissingH1Row(row)).length,
-    "flag-missingCanonical": state.rows.filter((row) => isMissingCanonicalRow(row)).length,
-    "flag-canonicalizedPages": state.rows.filter((row) => isCanonicalizedPageRow(row)).length,
-    "flag-noindexPages": state.rows.filter((row) => isNoindexPageRow(row)).length,
-    "flag-missingImageAlt": state.rows.filter((row) => isMissingImageAltRow(row)).length
+    "family-2xx": rowCounts.family2xx,
+    "family-3xx": rowCounts.family3xx,
+    "family-4xx": rowCounts.family4xx,
+    "family-5xx": rowCounts.family5xx,
+    "type-Page": rowCounts.typePage,
+    "type-Link": rowCounts.typeLink,
+    "type-Image": rowCounts.typeImage,
+    "area-content": rowCounts.areaContent,
+    "area-nav": rowCounts.areaNav,
+    "area-breadcrumb": rowCounts.areaBreadcrumb,
+    "area-footer": rowCounts.areaFooter,
+    "area-sidebar": rowCounts.areaSidebar,
+    "area-unknown": rowCounts.areaUnknown,
+    "flag-issuesOnly": rowCounts.issues,
+    "flag-redirectsOnly": rowCounts.redirects,
+    "flag-errorsOnly": rowCounts.errors,
+    "flag-skippedOnly": rowCounts.skipped,
+    "flag-missingTitle": rowCounts.missingTitle,
+    "flag-missingDescription": rowCounts.missingDescription,
+    "flag-missingH1": rowCounts.missingH1,
+    "flag-missingCanonical": rowCounts.missingCanonical,
+    "flag-canonicalizedPages": rowCounts.canonicalizedPages,
+    "flag-noindexPages": rowCounts.noindexPages,
+    "flag-missingImageAlt": rowCounts.missingImageAlt
   };
 
   elements.filterPanel.querySelectorAll("[data-count-for]").forEach((countElement) => {
@@ -2969,8 +3074,8 @@ function clearResultFilters(render = true) {
   }
 }
 
-function visibleRows() {
-  const visiblePageRows = currentPagination().visiblePageRows;
+function visibleRows(pagination = currentPagination()) {
+  const visiblePageRows = pagination.visiblePageRows;
   const rows = [];
 
   visiblePageRows.forEach((pageRow) => {
@@ -3037,8 +3142,7 @@ function currentPagination() {
   };
 }
 
-function renderPaginationControls() {
-  const pagination = currentPagination();
+function renderPaginationControls(pagination = currentPagination()) {
   const hasPages = pagination.totalPageRows > 0;
   const needsPagination = pagination.totalPageRows > pagination.pageSize || state.showAll;
   const activeRun = isActivelyRunning();
@@ -3346,12 +3450,12 @@ function sortValue(row, column) {
   return { kind: "text", number: 0, text: String(value || "") };
 }
 
-function renderRow(row) {
+function renderRow(row, childCounts) {
   const tr = document.createElement("tr");
   tr.className = row.rowType === "Page" ? "page-row" : "asset-row";
   const values = [
     stateCell(row),
-    expandCell(row),
+    expandCell(row, childCounts),
     textCell("type", row.rowType, `type-tag type-${String(row.rowType || "").toLowerCase()}`),
     openCell(row),
     textCell("inputUrl", row.inputUrl),
@@ -3472,14 +3576,16 @@ function openCell(row) {
   return td;
 }
 
-function expandCell(row) {
+function expandCell(row, childCounts) {
   const td = document.createElement("td");
   td.dataset.column = "expander";
   if (row.rowType !== "Page") {
     return td;
   }
 
-  const childCount = state.rows.filter((child) => child.rowType !== "Page" && child.groupId === row.groupId).length;
+  const childCount = childCounts
+    ? (childCounts.get(row.groupId) || 0)
+    : state.rows.filter((child) => child.rowType !== "Page" && child.groupId === row.groupId).length;
   if (!childCount) {
     return td;
   }
@@ -3858,7 +3964,7 @@ function renderSummaryPlaceholderBreakdown(title, items) {
   return section;
 }
 
-function renderSummaryPanel() {
+function renderSummaryPanel(counts = computeRowCounts()) {
   const hasRows = state.rows.length > 0;
   elements.summaryPanel.hidden = false;
   if (!hasRows) {
@@ -3875,7 +3981,7 @@ function renderSummaryPanel() {
     state.panelCollapsed.summary = false;
   }
 
-  const stats = summaryStats();
+  const stats = summaryStats(counts);
   elements.summaryPanelLine.textContent = summaryStatusText(stats);
 
   const metrics = [
@@ -3923,50 +4029,42 @@ function renderSummaryPanel() {
   renderPanelStates();
 }
 
-function summaryStats() {
-  const rows = state.rows;
-  const pages = rows.filter((row) => row.rowType === "Page");
-  const links = rows.filter((row) => row.rowType === "Link");
-  const images = rows.filter((row) => row.rowType === "Image");
-  const issueRows = rows.filter((row) => isIssueRow(row));
+function summaryStats(counts = computeRowCounts()) {
   const pageIssues = {
-    missingTitle: rows.filter((row) => isMissingTitleRow(row)).length,
-    missingDescription: rows.filter((row) => isMissingDescriptionRow(row)).length,
-    missingH1: rows.filter((row) => isMissingH1Row(row)).length,
-    missingCanonical: rows.filter((row) => isMissingCanonicalRow(row)).length,
-    canonicalizedPages: rows.filter((row) => isCanonicalizedPageRow(row)).length,
-    noindexPages: rows.filter((row) => isNoindexPageRow(row)).length,
-    missingImageAlt: rows.filter((row) => isMissingImageAltRow(row)).length
+    missingTitle: counts.missingTitle,
+    missingDescription: counts.missingDescription,
+    missingH1: counts.missingH1,
+    missingCanonical: counts.missingCanonical,
+    canonicalizedPages: counts.canonicalizedPages,
+    noindexPages: counts.noindexPages,
+    missingImageAlt: counts.missingImageAlt
   };
-  const non200Links = links.filter((row) => isNon200Status(row.statusCode, row.redirectCount)).length;
-  const non200Images = images.filter((row) => isNon200Status(row.statusCode, row.redirectCount)).length;
-  const assetSkipped = rows.filter((row) => row.rowType !== "Page" && isSkippedRow(row)).length;
   const families = {
-    "2xx": rows.filter((row) => statusFamily(row.statusCode) === "2xx").length,
-    "3xx": rows.filter((row) => statusFamily(row.statusCode) === "3xx").length,
-    "4xx": rows.filter((row) => statusFamily(row.statusCode) === "4xx").length,
-    "5xx": rows.filter((row) => statusFamily(row.statusCode) === "5xx").length
+    "2xx": counts.family2xx,
+    "3xx": counts.family3xx,
+    "4xx": counts.family4xx,
+    "5xx": counts.family5xx
   };
 
   return {
-    total: rows.length,
-    checked: rows.filter((row) => isCheckedRow(row)).length,
-    complete: rows.filter((row) => isCheckedRow(row)).length,
-    pages: pages.length,
-    links: links.length,
-    images: images.length,
-    issueRows: issueRows.length,
-    statusIssues: issueRows.length,
-    notFound: rows.filter((row) => is404Row(row)).length,
-    redirects: rows.filter((row) => Number(row.redirectCount || 0) > 0).length,
-    skipped: rows.filter((row) => isSkippedRow(row)).length,
-    assetSkipped,
-    errors: rows.filter((row) => isErrorRow(row)).length,
-    non200Links,
-    non200Images,
+    total: counts.total,
+    checked: counts.checked,
+    complete: counts.checked,
+    pages: counts.typePage,
+    links: counts.typeLink,
+    images: counts.typeImage,
+    issueRows: counts.issues,
+    statusIssues: counts.issues,
+    notFound: counts.notFound,
+    redirects: counts.redirects,
+    skipped: counts.skipped,
+    assetSkipped: counts.assetSkipped,
+    errors: counts.errors,
+    non200Links: counts.non200Links,
+    non200Images: counts.non200Images,
     families,
     pageIssueTotal: pageIssues.missingTitle + pageIssues.missingDescription + pageIssues.missingH1 + pageIssues.missingCanonical + pageIssues.canonicalizedPages + pageIssues.noindexPages,
-    assetIssueTotal: non200Links + non200Images + pageIssues.missingImageAlt + assetSkipped,
+    assetIssueTotal: counts.non200Links + counts.non200Images + pageIssues.missingImageAlt + counts.assetSkipped,
     pageIssues
   };
 }
@@ -4195,12 +4293,12 @@ function getUrlHostname(value) {
   }
 }
 
-function updateSummary() {
-  const total = state.rows.length;
-  const checked = state.rows.filter((row) => isCheckedRow(row)).length;
-  const issues = state.rows.filter((row) => isIssueRow(row)).length;
-  const notFound = state.rows.filter((row) => is404Row(row)).length;
-  const skipped = state.rows.filter((row) => row.result && row.result.startsWith("Not checked")).length;
+function updateSummary(counts = computeRowCounts()) {
+  const total = counts.total;
+  const checked = counts.checked;
+  const issues = counts.issues;
+  const notFound = counts.notFound;
+  const skipped = counts.skipped;
   elements.only404Button.disabled = isActivelyRunning() || !state.rows.length || !notFound;
   elements.only404Button.setAttribute("aria-pressed", String(state.only404));
   elements.only404Button.querySelector("span").textContent = "404 Results";
@@ -4211,7 +4309,7 @@ function updateSummary() {
   elements.summaryLine.textContent = total
     ? `${formatMaybeNumber(checked)}/${formatMaybeNumber(total)} items checked. ${formatMaybeNumber(issues)} status issues. ${formatMaybeNumber(notFound)} 404s. ${formatMaybeNumber(skipped)} skipped.${filter}`
     : "No checks run yet.";
-  renderSummaryPanel();
+  renderSummaryPanel(counts);
 }
 
 function activeFilterSummary() {
